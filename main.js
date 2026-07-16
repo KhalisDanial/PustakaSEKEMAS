@@ -494,9 +494,38 @@ async function lookupISBN() {
 
 // 2. SAHKAN & SIMPAN DATA DARIPADA API KE SUPABASE
 async function uploadISBNData() {
-    if (!temporaryBookData) return;
+    // Pindahkan semakan ini ke atas supaya ralat tidak berlaku jika temporaryBookData kosong
+    if (!temporaryBookData) return; 
 
-    // Masukkan maklumat ke dalam jadual 'books' di Supabase
+    // Ambil nilai ISBN daripada elemen pratonton
+    const isbnCode = document.getElementById('prev-isbn').textContent;
+
+    // 1. SEKATAN: Semak duplikasi terus di Supabase untuk mendapatkan Tajuk & Tarikh
+    const { data: existingBook, error: checkError } = await supabaseClient
+        .from('books')
+        .select('title, created_at')
+        .eq('book_barcode', isbnCode)
+        .eq('school_id', currentSchoolId) // Pastikan ia menyemak khusus untuk sekolah/institusi semasa
+        .maybeSingle();
+
+    if (checkError) {
+        console.error("Ralat semakan duplikasi:", checkError);
+        alert("Sistem ralat semasa menyemak status buku.");
+        return;
+    }
+
+    // Jika buku sudah wujud, paparkan amaran terperinci
+    if (existingBook) {
+        // Tukar format tarikh (Contoh: 16 Julai 2026)
+        const tarikhDaftar = new Date(existingBook.created_at).toLocaleDateString('ms-MY', {
+            day: 'numeric', month: 'long', year: 'numeric'
+        });
+
+        alert(`❌ PENDAFTARAN DIBATALKAN!\n\nBuku dengan ISBN [${isbnCode}] telah didaftarkan dalam inventori.\n\nTajuk Buku: ${existingBook.title}\nTarikh Didaftar: ${tarikhDaftar}`);
+        return; // Hentikan fungsi di sini, data tidak akan disimpan
+    } 
+
+    // 2. PROSES PENYIMPANAN: Masukkan maklumat ke dalam jadual 'books' di Supabase
     const { error } = await supabaseClient
         .from('books')
         .insert([{
@@ -515,6 +544,7 @@ async function uploadISBNData() {
 
     alert(`Berjaya mendaftarkan: "${temporaryBookData.title}"!`);
     
+    // 3. RESET ANTARAMUKA PENGGUNA
     temporaryBookData = null;
     document.getElementById('isbn-preview-card').classList.add('hidden');
     
@@ -533,12 +563,41 @@ async function saveManualBook() {
     const title = titleInput.value.trim();
     const author = authorInput.value.trim();
 
-    // Pengesahan input kosong
+    // 1. Pengesahan input kosong
     if (!barcode || !title) {
         alert("Sila isi sekurang-kurangnya Kod Bar dan Tajuk Buku.");
         return;
     }
 
+    // 2. SEKATAN: Semak duplikasi kod bar manual di Supabase
+    const { data: existingBook, error: checkError } = await supabaseClient
+        .from('books')
+        .select('title, created_at')
+        .eq('book_barcode', barcode)
+        .eq('school_id', currentSchoolId)
+        .maybeSingle();
+
+    if (checkError) {
+        console.error("Ralat semakan duplikasi manual:", checkError);
+        alert("Sistem ralat semasa menyemak status kod bar.");
+        return;
+    }
+
+    // Jika kod bar sudah digunakan, paparkan amaran terperinci
+    if (existingBook) {
+        const tarikhDaftar = new Date(existingBook.created_at).toLocaleDateString('ms-MY', {
+            day: 'numeric', month: 'long', year: 'numeric'
+        });
+
+        alert(`❌ PENDAFTARAN DIBATALKAN!\n\nKod bar [${barcode}] telah digunakan dalam inventori.\n\nTajuk Buku: ${existingBook.title}\nTarikh Didaftar: ${tarikhDaftar}`);
+        
+        // Kosongkan semula input kod bar supaya mudah diimbas kod baru
+        barcodeInput.value = '';
+        barcodeInput.focus();
+        return; 
+    }
+
+    // 3. PROSES PENYIMPANAN: Jika tiada duplikasi, teruskan simpan ke database
     const { error } = await supabaseClient
         .from('books')
         .insert([{
@@ -551,12 +610,13 @@ async function saveManualBook() {
 
     if (error) {
         console.error(error);
-        alert("Gagal mendaftar secara manual. Sila semak jika kod bar telah wujud.");
+        alert("Gagal mendaftar secara manual. Sila pastikan sistem dalam keadaan baik.");
         return;
     }
 
     alert(`Buku "${title}" berjaya didaftarkan secara manual!`);
 
+    // 4. RESET ANTARAMUKA PENGGUNA
     barcodeInput.value = '';
     titleInput.value = '';
     authorInput.value = '';
@@ -1335,4 +1395,26 @@ if (triggerBtn) {
     });
 } else {
     console.warn("Butang #kiosk-trigger tidak dijumpai dalam HTML.");
+}
+
+// Fungsi untuk memeriksa sama ada buku sudah wujud dalam database
+async function isBookAlreadyRegistered(barcode) {
+    try {
+        const { data, error } = await supabase
+            .from('books') // *** TUKAR 'books' jika nama tabel Supabase anda berbeza
+            .select('barcode') // *** TUKAR 'barcode' mengikut nama kolum kod bar anda
+            .eq('barcode', barcode)
+            .maybeSingle(); // Mengambil satu data sahaja jika ada, tanpa mencetuskan ralat jika kosong
+
+        if (error) {
+            console.error("Ralat semasa menyemak pangkalan data:", error);
+            return false;
+        }
+
+        // Jika data wujud (not null), bermakna buku sudah ada
+        return data !== null; 
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
 }
