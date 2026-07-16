@@ -405,7 +405,7 @@ function switchKatalogSubTab(tabName) {
 // INTEGRASI API ISBN & PENDAFTARAN MANUAL
 // ==========================================
 
-// 1. CARI MAKLUMAT BUKU VIA GOOGLE BOOKS API
+// 1. CARI MAKLUMAT BUKU VIA GOOGLE BOOKS & OPEN LIBRARY API
 async function lookupISBN() {
     const isbnInput = document.getElementById('isbn-input');
     const loadingIndicator = document.getElementById('isbn-loading');
@@ -422,32 +422,62 @@ async function lookupISBN() {
         return;
     }
 
+    // Paparkan status memuatkan & sembunyikan kad pratonton lama
+    loadingIndicator.innerText = "Mencari di pangkalan data...";
     loadingIndicator.classList.remove('hidden');
     previewCard.classList.add('hidden');
     temporaryBookData = null;
 
     try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${apiKey}`);
-        const data = await response.json();
-        console.log("Data diterima dari Google Books API:", data); 
+        let title = "Tiada Tajuk";
+        let authors = "Penulis Tidak Diketahui";
+        let bookFound = false;
 
-        if (!data.items || data.totalItems === 0) {
-            alert("Buku tidak dijumpai di pangkalan data Google Books. Sila guna Pendaftaran Manual.");
+        // --- CUBAAN 1: GOOGLE BOOKS API ---
+        console.log("Mencari maklumat di Google Books...");
+        const googleResponse = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${apiKey}`);
+        const googleData = await googleResponse.json();
+
+        if (googleData.items && googleData.totalItems > 0) {
+            const bookInfo = googleData.items[0].volumeInfo;
+            title = bookInfo.title || "Tiada Tajuk";
+            authors = bookInfo.authors ? bookInfo.authors.join(', ') : "Penulis Tidak Diketahui";
+            bookFound = true;
+            console.log("Buku berjaya dijumpai di Google Books!");
+        } 
+        else {
+            // --- CUBAAN 2: OPEN LIBRARY API (FALLBACK) ---
+            console.log("Tiada di Google Books. Beralih ke Open Library...");
+            loadingIndicator.innerText = "Mencari di Open Library..."; // Update status UI
+            
+            const olResponse = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&jscmd=data&format=json`);
+            const olData = await olResponse.json();
+            const olKey = `ISBN:${isbn}`;
+
+            if (olData[olKey]) {
+                const bookInfo = olData[olKey];
+                title = bookInfo.title || "Tiada Tajuk";
+                authors = bookInfo.authors ? bookInfo.authors.map(a => a.name).join(', ') : "Penulis Tidak Diketahui";
+                bookFound = true;
+                console.log("Buku berjaya dijumpai di Open Library!");
+            }
+        }
+
+        // --- KEPUTUSAN GABUNGAN ---
+        if (!bookFound) {
+            alert("Buku tidak dijumpai di Google Books mahupun Open Library. Sila guna pendaftaran Manual.");
             loadingIndicator.classList.add('hidden');
             return;
         }
 
-        const bookInfo = data.items[0].volumeInfo;
-        const title = bookInfo.title || "Tiada Tajuk";
-        const authors = bookInfo.authors ? bookInfo.authors.join(', ') : "Penulis Tidak Diketahui";
-
+        // --- SEDIAKAN DATA UNTUK DISIMPAN ---
         temporaryBookData = {
             barcode: isbn,
             title: title,
             author: authors
         };
 
-        // Update UI
+        // --- KEMASKINI ANTARAMUKA (UI) ---
         document.getElementById('prev-title').innerText = title;
         document.getElementById('prev-author').innerText = authors;
         document.getElementById('prev-isbn').innerText = isbn;
