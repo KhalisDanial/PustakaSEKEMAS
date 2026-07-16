@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pinjaman Buku</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Pustaka Ikon Moden (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <div class="library-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="library-sidebar">
+            <h2>Perpustakaan</h2>
+            <div class="user-badge">Staf: <span id="librarian-email">-</span></div>
+            <hr>
+            <nav>
+                <button id="btn-nav-sirkulasi" class="nav-btn active" onclick="switchLibraryView('SIRKULASI')">
+                    <i data-lucide="book-open"></i> Kaunter Sirkulasi
+                </button>
+                <button id="btn-nav-katalog" class="nav-btn" onclick="switchLibraryView('KATALOG')">
+                    <i data-lucide="library"></i> Katalog Buku
+                </button>
+                <button id="btn-nav-log" class="nav-btn" onclick="switchLibraryView('LOG')">
+                    <i data-lucide="activity"></i> Log & Ringkasan
+                </button>
+                <button id="btn-nav-history" onclick="switchLibraryView('HISTORY')" class="nav-btn">
+                    <i data-lucide="calendar-clock"></i> Sejarah Pinjaman
+                </button>
+                <button id="btn-nav-inventori" class="nav-btn" onclick="switchLibraryView('INVENTORI')">
+                    <i data-lucide="archive"></i> Inventori Buku
+                </button>
+            </nav>
+            <button id="btn-lib-logout" class="logout-btn" onclick="handleLibraryLogout()">Log Keluar</button>
+        </aside>
+
+        <!-- MAIN DISPLAY PANELS -->
+        <main class="library-content">
+            
+            <!-- 1. KAUNTER SIRKULASI VIEW -->
+            <section id="view-sirkulasi" class="library-view">            
+                <div class="sirkulasi-layout">
+                    <!-- SCANNING MECHANIC (Focused Area) -->
+                    <div class="scan-box">
+                        <h3>Imbas Kad Murid atau Barcode Buku</h3>
+                        <!-- This input stays focused for continuous scanning -->
+                        <input type="text" id="library-scan-input" autocomplete="off" placeholder="Sila imbas di sini..." autofocus>
+                        <div id="scan-feedback-message" class="feedback-banner info">Sistem Sedia. Sila imbas item.</div>
+                    </div>
+
+                    <!-- ACTIVE TRANSACTION STATUS TILES -->
+                    <div class="transaction-cards">
+                        <!-- Student Info Card -->
+                        <div id="card-active-borrower" class="status-card empty">
+                            <h4>Peminjam Aktif</h4>
+                            <div class="card-body">Tiada murid diimbas. Sila imbas kad murid untuk mula meminjam.</div>
+                        </div>
+
+                        <!-- Latest Action Live Card -->
+                        <div id="card-latest-action" class="status-card empty">
+                            <h4>Transaksi Terakhir</h4>
+                            <div class="card-body">Menunggu imbasan...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. KATALOG BUKU VIEW -->
+            <section id="view-katalog" class="library-view hidden">
+                <div class="katalog-header">
+                    <h2>Katalog & Pendaftaran Buku</h2>
+                    <!-- Internal Sub-Navigation Menu -->
+                    <div class="katalog-tabs">
+                        <button id="tab-btn-isbn" class="katalog-tab-btn active" onclick="switchKatalogSubTab('ISBN')">
+                            <i data-lucide="barcode"></i> Imbasan ISBN (API)
+                        </button>
+                        <button id="tab-btn-csv" class="katalog-tab-btn" onclick="switchKatalogSubTab('CSV')">
+                            <i data-lucide="file-spreadsheet"></i> Muat Naik Pukal (CSV)
+                        </button>
+                        <button id="tab-btn-manual" class="katalog-tab-btn" onclick="switchKatalogSubTab('MANUAL')">
+                            <i data-lucide="pen-tool"></i> Pendaftaran Manual
+                        </button>
+                    </div>
+                </div>
+
+                <div class="katalog-body">
+                    <!-- SUB-TAB 1: ISBN API SCANNER -->
+                    <div id="subview-isbn" class="katalog-subview">
+                        <div class="input-card">
+                            <h3>Pendaftaran Pintar via ISBN</h3>
+                            <p class="subtitle">Imbas kod bar ISBN di belakang buku untuk menarik maklumat secara automatik.</p>
+                            <div class="search-box-row">
+                                <input type="text" id="isbn-input" placeholder="Imbas atau taip ISBN (e.g., 9780747532699)...">
+                                <button onclick="lookupISBN()">Cari Buku</button>
+                            </div>
+                            <div id="isbn-loading" class="spinner hidden">Mencari maklumat di Google Books...</div>
+                        </div>
+                        
+                        <!-- Dynamic Preview Card before saving -->
+                        <div id="isbn-preview-card" class="preview-card hidden">
+                            <h4>Pratonton Maklumat Buku</h4>
+                            <div class="preview-details">
+                                <div class="preview-text">
+                                    <p><strong>Tajuk:</strong> <span id="prev-title">-</span></p>
+                                    <p><strong>Penulis:</strong> <span id="prev-author">-</span></p>
+                                    <p><strong>Barcode/ISBN:</strong> <span id="prev-isbn">-</span></p>
+                                </div>
+                            </div>
+                            <button class="btn-confirm-upload" onclick="uploadISBNData()">Sahkan & Simpan Buku</button>
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB 2: CSV BULK UPLOAD -->
+                    <div id="subview-csv" class="katalog-subview hidden">
+                        <div class="input-card">
+                            <h3>Muat Naik Fail Pukal (.CSV)</h3>
+                            <p class="subtitle">Sesuai untuk memasukkan beratus atau beribu data buku sekaligus daripada Excel.</p>
+                            <div class="dropzone" id="csv-dropzone">
+                                <input type="file" id="csv-file-input" accept=".csv" style="display:none;">
+                                <p>Seret fail CSV anda ke sini atau <a href="#" onclick="document.getElementById('csv-file-input').click(); return false;">Pilih Fail</a></p>
+                                <small>Pastikan lajur mengandungi: barcode, title, author</small>
+                            </div>
+                            <div id="csv-progress" class="feedback-banner info hidden">Memproses baris data...</div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB 3: MANUAL REGISTRATION -->
+                    <div id="subview-manual" class="katalog-subview hidden">
+                        <div class="input-card">
+                            <h3>Borang Pendaftaran Manual</h3>
+                            <p class="subtitle">Gunakan borang ini untuk buku tanpa ISBN, majalah, atau modul cetakan sendiri.</p>
+                            <div class="manual-form">
+                                <label>Kod Bar / ID Buku</label>
+                                <input type="text" id="manual-barcode" placeholder="Imbas stiker kod bar pada buku...">
+                                
+                                <label>Tajuk Buku</label>
+                                <input type="text" id="manual-title" placeholder="Masukkan tajuk penuh...">
+                                
+                                <label>Penulis</label>
+                                <input type="text" id="manual-author" placeholder="Nama penulis / panel pengarang...">
+                                
+                                <button class="btn-submit-form" onclick="saveManualBook()">Daftar Buku</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. LOG & RINGKASAN VIEW -->
+            <section id="view-log" class="library-view hidden">
+                <div class="katalog-header">
+                    <h2>Senarai Buku Berdaftar & Status</h2>
+                </div>
+
+                <!-- KAD KPI RINGKASAN -->
+                <div class="kpi-grid">
+                    <div class="kpi-card kpi-blue">
+                        <p>Jumlah Buku</p>
+                        <h3 id="kpi-total">0</h3>
+                    </div>
+                    <div class="kpi-card kpi-green">
+                        <p>Buku Ada</p>
+                        <h3 id="kpi-available">0</h3>
+                    </div>
+                    <div class="kpi-card kpi-yellow">
+                        <p>Sedang Dipinjam</p>
+                        <h3 id="kpi-borrowed">0</h3>
+                    </div>
+                    <div class="kpi-card kpi-red">
+                        <p>Status Lewat (>7 Hari)</p>
+                        <h3 id="kpi-overdue">0</h3>
+                    </div>
+                </div>
+
+                <div class="input-card">
+                    <!-- BAHAGIAN TAPISAN & BUTANG EKSPORT -->
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label for="loan-duration-filter">Tapis Tempoh Pinjaman:</label>
+                            <select id="loan-duration-filter" onchange="fetchRegisteredBooks()">
+                                <option value="all">Semua Buku (Tiada Tapisan)</option>
+                                <option value="3">Dipinjam > 3 Hari</option>
+                                <option value="7">Dipinjam > 7 Hari</option>
+                                <option value="10">Dipinjam > 10 Hari</option>
+                                <option value="14">Dipinjam > 14 Hari</option>
+                                <option value="21">Dipinjam > 21 Hari</option>
+                                <option value="28">Dipinjam > 28 Hari</option>
+                            </select>
+
+                            <select id="book-status-filter">
+                                <option value="all">Semua Status</option>
+                                <option value="Available">Ada di Perpustakaan</option>
+                                <option value="Borrowed">Sedang Dipinjam</option>
+                                <option value="Overdue">Lewat Dipulangkan</option>
+                            </select>
+                            
+                            <div class="search-input-wrapper">
+                                <i data-lucide="search" class="search-icon"></i>
+                                <input type="text" id="log-search-input" placeholder="Cari Tajuk / Penulis...">
+                            </div>
+                        </div>
+                        <div class="export-buttons">
+                            <button onclick="printReport()" class="btn-action btn-print">
+                                <i data-lucide="printer"></i> Cetak / PDF
+                            </button>
+                            <button onclick="exportCSV()" class="btn-action btn-csv">
+                                <i data-lucide="download"></i> Muat Turun CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="log-table" class="library-table">
+                            <thead>
+                                <tr>
+                                    <th>Kod Bar / ISBN</th>
+                                    <th>Tajuk Buku</th>
+                                    <th>Penulis</th>
+                                    <th>Status</th>
+                                    <th>Nama Peminjam</th>
+                                    <th>Kelas</th>
+                                    <th>Tarikh Pinjam</th>
+                                </tr>
+                            </thead>
+                            <tbody id="books-table-body">
+                                 <tr><td colspan="7" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. INVENTORI BUKU VIEW -->
+            <section id="view-inventori" class="library-view hidden">
+                <div class="view-header">
+                    <h2>Inventori Buku Terdaftar</h2>
+                </div>
+                
+                <!-- Bahagian A: Senarai Buku Aktif -->
+                <div class="input-card">
+                    <div class="filter-bar">
+                        <div class="search-input-wrapper full-width">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" id="inventori-search-input" placeholder="Cari buku mengikut tajuk atau nama penulis...">
+                        </div>
+                    </div>                    
+                    
+                    <h3 class="section-title">Buku Aktif dalam Perpustakaan</h3>
+                    <div class="table-responsive">
+                        <table class="library-table">
+                            <thead>
+                                <tr>
+                                    <th>Kod Bar</th>
+                                    <th>Tajuk Buku</th>
+                                    <th>Penulis</th>
+                                    <th>Status</th>
+                                    <th>Tarikh Daftar</th>
+                                    <th>Tempoh Simpanan</th>
+                                    <th style="text-align: center;">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-active-table-body">
+                                <!-- Data buku aktif -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bahagian B: Sub-seksyen Rekod Buku Dilupuskan -->
+                <div class="input-card inactive-card">
+                    <h3 class="section-title text-muted">Rekod Buku Dilupuskan (Tidak Aktif)</h3>
+                    <p class="subtitle">Senarai di bawah memaparkan arkib buku yang telah dikeluarkan secara kekal dari inventori aktif bagi mengelakkan kerosakan pada data sejarah pinjaman sirkulasi.</p>
+                    
+                    <div class="table-responsive">
+                        <table class="library-table">
+                            <thead>
+                                <tr>
+                                    <th>Kod Bar</th>
+                                    <th>Tajuk Buku</th>
+                                    <th>Penulis</th>
+                                    <th>Tarikh Daftar Asal</th>
+                                    <th>Tarikh Dilupuskan</th>
+                                    <th>Status Akhir</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-inactive-table-body">
+                                <!-- Data buku tidak aktif -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>            
+
+            <!-- 5. TAB SEJARAH LENGKAP -->
+            <section id="view-history" class="library-view hidden">
+                <div class="view-header">
+                    <h2>Sejarah Lengkap Sirkulasi</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="library-table">
+                        <thead>
+                            <tr>
+                                <th>Tarikh Pinjam</th>
+                                <th>Tarikh Pulang</th>
+                                <th>Tajuk Buku</th>
+                                <th>Peminjam</th>
+                                <th>Kelas</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <!-- Data sejarah -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>            
+        </main>
+    </div>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <!-- Trigger Khas untuk Admin (Bucu Kiri Bawah) -->
+    <div id="kiosk-trigger" title="Admin Access"></div>   
+
+    <!-- Supabase & Main JS -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="main.js"></script>
+ 
+</body>
+</html>
