@@ -604,11 +604,11 @@ body {
 
 #kiosk-trigger {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 40px;
-    height: 40px;
-    background: transparent; /* Atau guna rgba(0,0,0,0.1) jika mahu ia nampak sedikit */
-    z-index: 9999; /* Pastikan ia berada paling depan */
+    top: 0;        /* Ubah dari bottom kepada top */
+    right: 0;      /* Ubah dari left kepada right */
+    width: 50px;   /* Sedikit lebih besar untuk memudahkan tap di bucu */
+    height: 50px;
+    background: transparent;
+    z-index: 9999; /* Pastikan ia sentiasa di atas elemen lain */
     cursor: pointer;
 }
