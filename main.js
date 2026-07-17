@@ -52,14 +52,43 @@ async function handleLogin(e) {
     }
 }
 
-function showApp(user) {
+// ==========================================
+// KAWALAN AUTENTIKASI (LOGIN & LOGOUT) - DIKEMASKINI
+// ==========================================
+async function showApp(user) {
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('main-app').classList.remove('hidden');
     
-    // Kemaskini nama e-mel pustakawan pada lencana pengenalan sidebar
+    // Nilai lalai (fallback) jika profil tiada di dalam pangkalan data
+    let displayName = user.email;
+    let displayRole = "Pustakawan";
+
+    try {
+        // Ambil data profil secara dinamik daripada jadual 'profiles' yang dikongsi
+        const { data: profile, error } = await supabaseClient
+            .from('profiles')
+            .select('full_name, role')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        if (profile) {
+            displayName = profile.full_name;
+            displayRole = profile.role || "Pustakawan SEKEMAS";
+        }
+    } catch (err) {
+        console.warn("Gagal memuatkan profil pengguna, menggunakan e-mel sebagai ganti:", err.message);
+    }
+
+    // Kemaskini lencana pengenalan sidebar dengan rekabentuk yang lebih profesional
     const userBadge = document.querySelector('.user-badge');
     if (userBadge) {
-        userBadge.innerHTML = `Pustakawan: <strong style="color: var(--primary-color);">${user.email}</strong>`;
+        userBadge.innerHTML = `
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Pustakawan Bertugas:</div>
+            <strong style="color: var(--primary-color); font-size: 0.95rem; display: block; margin: 3px 0; line-height: 1.3;">${displayName}</strong>
+            <span style="background: #e2e8f0; color: #4a5568; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block;">${displayRole}</span>
+        `;
     }
     
     // Mulakan proses memuatkan data sistem
