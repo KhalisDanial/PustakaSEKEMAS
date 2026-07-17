@@ -174,15 +174,20 @@ body {
 .kpi-red { border-left-color: var(--danger); }
 
 /* =========================================
-   6. PENGIMBAS (KIOSK MODE) - Animasi Pulse
+   6. PENGIMBAS (KIOSK MODE) & KAD STATUS
 ========================================= */
+.sirkulasi-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .scan-box {
     background: white;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     text-align: center;
-    margin-bottom: 25px;
 }
 
 .scan-box input {
@@ -212,6 +217,59 @@ body {
 .feedback-banner.info { background: #ebf8ff; color: #2b6cb0; }
 .feedback-banner.success { background: #f0fff4; color: #2f855a; }
 .feedback-banner.danger { background: #fff5f5; color: #c53030; }
+
+/* 🌟 DITAMBAH: Gaya untuk Kad Transaksi (Peminjam & Aksi Terakhir) */
+.transaction-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.status-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    border-top: 4px solid var(--border-color);
+}
+
+.status-card h4 {
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.status-card.empty { border-top-color: var(--border-color); color: var(--text-muted); }
+.status-card.active-user { border-top-color: var(--info); }
+.status-card.action-borrow { border-top-color: var(--warning); }
+.status-card.action-return { border-top-color: var(--success); }
+
+.card-body p { margin-bottom: 5px; }
+
+.btn-clear-session {
+    margin-top: 15px;
+    background: #edf2f7;
+    color: var(--text-dark);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-clear-session:hover { background: #e2e8f0; }
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.badge-borrow { background: #fefcbf; color: #744210; }
+.badge-return { background: #c6f6d5; color: #22543d; }
 
 /* =========================================
    7. JADUAL BERKUALITI TINGGI (TABLES)
@@ -297,7 +355,7 @@ body {
    9. CETAKAN & PDF (PRINT MEDIA)
 ========================================= */
 @media print {
-    .library-sidebar, .katalog-header, .export-buttons, select, label, .no-print {
+    .library-sidebar, .katalog-header, .export-buttons, select, label, .no-print, .filter-bar {
         display: none !important;
     }
     
@@ -349,6 +407,13 @@ body {
 .inactive-card {
     background-color: #f8fafc;
     border: 1px dashed var(--border-color);
+}
+
+.spinner {
+    display: inline-block;
+    margin-top: 15px;
+    color: var(--info);
+    font-weight: 500;
 }
 
 /* =========================================
@@ -467,10 +532,9 @@ body {
 }
 
 .search-box-row input {
-    flex: 1; /* Input akan mengambil ruang maksimum yang ada */
+    flex: 1;
 }
 
-/* Gaya Butang Standard (Cari Buku, dsb.) */
 .search-box-row button, 
 .btn-submit-form {
     background-color: var(--primary-color);
@@ -492,7 +556,25 @@ body {
     background-color: var(--primary-hover);
 }
 
-/* Gaya Butang Khas: Sahkan & Simpan Buku (Warna Hijau) */
+/* 🌟 DITAMBAH: Kad Pratonton ISBN (Preview Card) */
+.preview-card {
+    background: #f8fafc;
+    border: 1px solid var(--primary-color);
+    padding: 25px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.preview-card h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.preview-text p {
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
 .btn-confirm-upload {
     background-color: var(--success);
     color: white;
@@ -508,10 +590,9 @@ body {
 }
 
 .btn-confirm-upload:hover {
-    background-color: #276749; /* Warna hijau yang lebih gelap apabila di-hover */
+    background-color: #276749;
 }
 
-/* Gaya Susun Atur Borang Manual */
 .manual-form {
     display: flex;
     flex-direction: column;
@@ -534,14 +615,11 @@ body {
 /* =========================================
    14. REKA BENTUK RESPONSIVE (TABLET & TELEFON)
 ========================================= */
-/* Aktifkan gaya ini hanya jika lebar skrin 992px dan ke bawah (Tablet/Telefon) */
 @media (max-width: 992px) {
-    /* 1. Ubah susun atur utama dari Kiri-Kanan kepada Atas-Bawah */
     .library-container {
         flex-direction: column; 
     }
 
-    /* 2. Ubah Sidebar menjadi Top Navigation Bar */
     .library-sidebar {
         width: 100%;
         height: auto;
@@ -551,7 +629,6 @@ body {
         box-shadow: 0 4px 6px rgba(0,0,0,0.03);
     }
 
-    /* 3. Susun tajuk dan ID staf supaya sebaris */
     .library-sidebar h2 {
         display: inline-block;
         margin-right: 15px;
@@ -564,36 +641,32 @@ body {
     }
 
     .library-sidebar hr {
-        display: none; /* Sembunyikan garisan pemisah */
+        display: none; 
     }
 
-    /* 4. Jadikan butang menu melintang dan boleh di-swipe (scroll) */
     .library-sidebar nav {
         display: flex;
-        overflow-x: auto; /* Membenarkan pengguna swipe kiri/kanan */
+        overflow-x: auto; 
         gap: 10px;
-        padding-bottom: 10px; /* Ruang bernafas untuk scrollbar */
+        padding-bottom: 10px; 
     }
 
-    /* 5. Baiki saiz butang supaya tidak penyek */
     .nav-btn {
-        flex: 0 0 auto; /* Halang butang daripada mengecil secara automatik */
+        flex: 0 0 auto; 
         width: auto;
         margin-bottom: 0;
         padding: 8px 15px;
-        white-space: nowrap; /* Teks butang kekal satu baris */
+        white-space: nowrap; 
     }
 
     .logout-btn {
-        display: none; /* Sembunyikan butang log keluar di paparan tablet untuk jimat ruang */
+        display: none; 
     }
 
-    /* 6. Ruang kandungan (Main Content) dilaraskan */
     .library-content {
         padding: 15px; 
     }
 
-    /* 7. Pastikan Kad Transaksi Sirkulasi tersusun ke bawah, bukan bersebelahan */
     .transaction-cards {
         display: flex;
         flex-direction: column;
@@ -604,11 +677,11 @@ body {
 
 #kiosk-trigger {
     position: fixed;
-    top: 0;        /* Ubah dari bottom kepada top */
-    right: 0;      /* Ubah dari left kepada right */
-    width: 50px;   /* Sedikit lebih besar untuk memudahkan tap di bucu */
+    top: 0;        
+    right: 0;      
+    width: 50px;   
     height: 50px;
     background: transparent;
-    z-index: 9999; /* Pastikan ia sentiasa di atas elemen lain */
+    z-index: 9999; 
     cursor: pointer;
 }

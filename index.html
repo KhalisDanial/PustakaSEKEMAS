@@ -105,10 +105,19 @@
                                 <div class="preview-text">
                                     <p><strong>Tajuk:</strong> <span id="prev-title">-</span></p>
                                     <p><strong>Penulis:</strong> <span id="prev-author">-</span></p>
-                                    <p><strong>Barcode/ISBN:</strong> <span id="prev-isbn">-</span></p>
+                                    <p><strong>Kod ISBN:</strong> <span id="prev-isbn">-</span></p>
+                                    <p><strong>Penerbit:</strong> <span id="prev-publisher">-</span></p>
+                                    <p><strong>Tahun Terbit:</strong> <span id="prev-year">-</span></p>
                                 </div>
                             </div>
-                            <button class="btn-confirm-upload" onclick="uploadISBNData()">Sahkan & Simpan Buku</button>
+                            
+                            <!-- Tambahan: Input Kod Bar Unik Sekolah -->
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e0;">
+                                <label style="font-weight: 600; color: #4a5568;">Masukkan Kod Bar Unik Buku (Wajib):</label>
+                                <input type="text" id="isbn-unique-barcode" placeholder="Contoh: SEKEMAS-F-00001" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            </div>
+
+                            <button class="btn-confirm-upload" onclick="uploadISBNData()" style="margin-top: 15px;">Sahkan & Simpan Buku</button>
                         </div>
                     </div>
 
@@ -130,16 +139,25 @@
                     <div id="subview-manual" class="katalog-subview hidden">
                         <div class="input-card">
                             <h3>Borang Pendaftaran Manual</h3>
-                            <p class="subtitle">Gunakan borang ini untuk buku tanpa ISBN, majalah, atau modul cetakan sendiri.</p>
+                            <p class="subtitle">Gunakan borang ini untuk mendaftar buku berserta kod bar unik secara manual.</p>
                             <div class="manual-form">
-                                <label>Kod Bar / ID Buku</label>
-                                <input type="text" id="manual-barcode" placeholder="Imbas stiker kod bar pada buku...">
+                                <label>Kod Bar Unik Sistem (Wajib)</label>
+                                <input type="text" id="manual-barcode" placeholder="Contoh: SEKEMAS-F-00001">
+
+                                <label>Kod ISBN (Wajib)</label>
+                                <input type="text" id="manual-isbn" placeholder="Imbas kod ISBN pada buku...">
                                 
-                                <label>Tajuk Buku</label>
+                                <label>Tajuk Buku (Wajib)</label>
                                 <input type="text" id="manual-title" placeholder="Masukkan tajuk penuh...">
                                 
-                                <label>Penulis</label>
+                                <label>Penulis (Wajib)</label>
                                 <input type="text" id="manual-author" placeholder="Nama penulis / panel pengarang...">
+
+                                <label>Penerbit (Pilihan)</label>
+                                <input type="text" id="manual-publisher" placeholder="Nama syarikat penerbitan...">
+
+                                <label>Tahun Terbit (Pilihan)</label>
+                                <input type="text" id="manual-year" placeholder="Contoh: 2023">
                                 
                                 <button class="btn-submit-form" onclick="saveManualBook()">Daftar Buku</button>
                             </div>
@@ -215,17 +233,17 @@
                         <table id="log-table" class="library-table">
                             <thead>
                                 <tr>
-                                    <th>Kod Bar / ISBN</th>
+                                    <th>Kod Bar Sistem</th> <!-- DITUKAR -->
+                                    <th>ISBN</th> <!-- DITAMBAH -->
                                     <th>Tajuk Buku</th>
                                     <th>Penulis</th>
                                     <th>Status</th>
-                                    <th>Nama Peminjam</th>
-                                    <th>Kelas</th>
+                                    <th>Peminjam & Kelas</th> <!-- DIGABUNG -->
                                     <th>Tarikh Pinjam</th>
                                 </tr>
                             </thead>
                             <tbody id="books-table-body">
-                                 <tr><td colspan="7" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
+                                <tr><td colspan="7" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -252,12 +270,12 @@
                         <table class="library-table">
                             <thead>
                                 <tr>
-                                    <th>Kod Bar</th>
-                                    <th>Tajuk Buku</th>
+                                    <th>Kod Bar Sistem</th> <!-- DITUKAR -->
+                                    <th>ISBN</th> <!-- DITAMBAH -->
+                                    <th>Maklumat Buku</th> <!-- DIGABUNG (Tajuk, Penerbit & Tahun) -->
                                     <th>Penulis</th>
                                     <th>Status</th>
                                     <th>Tarikh Daftar</th>
-                                    <th>Tempoh Simpanan</th>
                                     <th style="text-align: center;">Tindakan</th>
                                 </tr>
                             </thead>
@@ -277,11 +295,12 @@
                         <table class="library-table">
                             <thead>
                                 <tr>
-                                    <th>Kod Bar</th>
-                                    <th>Tajuk Buku</th>
+                                    <th>Kod Bar Sistem</th> <!-- DITUKAR -->
+                                    <th>ISBN</th> <!-- DITAMBAH -->
+                                    <th>Maklumat Buku</th>
                                     <th>Penulis</th>
-                                    <th>Tarikh Daftar Asal</th>
-                                    <th>Tarikh Dilupuskan</th>
+                                    <th>Tarikh Daftar</th>
+                                    <th>Tarikh Lupus</th>
                                     <th>Status Akhir</th>
                                 </tr>
                             </thead>
