@@ -802,3 +802,10 @@ body {
 .library-container.hidden {
     display: none !important;
 }
+
+/* =========================================
+   17. SISTEM PENYEMBUNYIAN GLOBAL (FIX)
+========================================= */
+.hidden {
+    display: none !important;
+}
