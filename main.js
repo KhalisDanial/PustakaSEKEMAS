@@ -1010,13 +1010,20 @@ async function fetchInventoryBooks() {
             );
         }
 
-        // Kemaskini Kaunter Teks Inventori
-        const countTextElement = document.getElementById('inventori-search-count');
-        if (countTextElement) countTextElement.innerText = `${displayedBooks.length} jumlah buku ditemui`;
-
         const activeBooks = displayedBooks.filter(b => b.is_active !== false);
         const inactiveBooks = displayedBooks.filter(b => b.is_active === false);
 
+        // Kemaskini Kaunter Teks Inventori (LEBIH TERPERINCI)
+        const countTextElement = document.getElementById('inventori-search-count');
+        if (countTextElement) {
+            countTextElement.innerHTML = `
+                <span style="color: var(--text-dark);"><strong>${displayedBooks.length}</strong> keseluruhan</span> 
+                <span style="margin: 0 8px; color: #cbd5e0;">|</span> 
+                <span style="color: var(--primary-color); font-weight: 600;">${activeBooks.length} Aktif</span> 
+                <span style="margin: 0 8px; color: #cbd5e0;">|</span> 
+                <span style="color: #e53e3e; font-weight: 600;">${inactiveBooks.length} Dilupuskan</span>
+            `;
+        }
         // 1. PAPARAN JADUAL BUKU AKTIF
         if (activeBooks.length === 0) {
             activeTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color: #718096;">Tiada padanan buku aktif.</td></tr>`;
