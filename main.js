@@ -592,8 +592,34 @@ async function saveManualBook() {
 }
 
 // ==========================================
-// PENGURUSAN MUAT NAIK PUKAL (CSV ENGINES)
+// PENGURUSAN MUAT NAIK PUKAL (SMART CSV PARSER)
 // ==========================================
+
+// Fungsi Utiliti: Membaca baris CSV dengan bijak (Mengelakkan isu koma di dalam tajuk buku)
+function parseCSVRow(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+            inQuotes = !inQuotes; // Tukar status jika terjumpa tanda petikan ("")
+        } else if (char === ',' && !inQuotes) {
+            // Jika terjumpa koma dan bukan di dalam petikan, ia adalah pemisah lajur sebenar
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current.trim());
+
+    // Buang tanda petikan ("") terluar jika ia diletakkan oleh Excel
+    return result.map(val => val.replace(/^"|"$/g, '').trim());
+}
+
 function processCSVFile(file) {
     if (file.type !== "text/csv" && !file.name.endsWith('.csv')) {
         alert("Ralat: Sila masukkan fail format .CSV sahaja.");
@@ -607,7 +633,11 @@ function processCSVFile(file) {
 
     reader.onload = async function (e) {
         const text = e.target.result;
-        const rows = text.split('\n').map(row => row.replace('\r', '').trim()).filter(row => row.length > 0);
+        
+        // Memecahkan fail kepada barisan rekod
+        const rows = text.split('\n')
+            .map(row => row.replace('\r', '').trim())
+            .filter(row => row.length > 0);
         
         if (rows.length <= 1) {
             alert("Fail CSV kosong atau tiada lajur data!");
@@ -615,7 +645,9 @@ function processCSVFile(file) {
             return;
         }
 
-        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+        // Guna parseCSVRow untuk membaca Header supaya lebih tepat
+        const headers = parseCSVRow(rows[0]).map(h => h.toLowerCase());
+        
         const barcodeIdx = headers.indexOf('barcode');
         const titleIdx = headers.indexOf('title');
         const authorIdx = headers.indexOf('author');
@@ -630,24 +662,33 @@ function processCSVFile(file) {
         }
 
         const booksBatch = [];
+        const seenBarcodes = new Set(); // Penapis keselamatan untuk elak kod bar berulang dalam fail
 
         for (let i = 1; i < rows.length; i++) {
-            // Pemisahan fail CSV asas (tidak menyokong koma dalam petikan)
-            const columns = rows[i].split(','); 
+            // Guna parseCSVRow untuk baris data supaya koma di dalam tajuk dibaca dengan selamat
+            const columns = parseCSVRow(rows[i]); 
+            
             if (columns.length < Math.max(barcodeIdx, titleIdx) + 1) continue; 
 
-            const barcode = columns[barcodeIdx].trim();
-            const title = columns[titleIdx].trim();
+            const barcode = columns[barcodeIdx];
+            const title = columns[titleIdx];
             
             if (barcode && title) {
+                // Semak jika terdapat pertindihan kod bar di dalam fail CSV yang sama
+                if (seenBarcodes.has(barcode)) {
+                    console.warn(`Baris diabaikan: Duplikasi kod bar [${barcode}] dikesan dalam fail.`);
+                    continue; 
+                }
+                seenBarcodes.add(barcode);
+
                 booksBatch.push({
                     school_id: currentSchoolId,
                     book_barcode: barcode,
                     title: title,
-                    author: authorIdx !== -1 && columns[authorIdx] ? columns[authorIdx].trim() : 'Tiada Maklumat',
-                    isbn: isbnIdx !== -1 && columns[isbnIdx] ? columns[isbnIdx].trim() : null,
-                    publisher: pubIdx !== -1 && columns[pubIdx] ? columns[pubIdx].trim() : null,
-                    year_published: yearIdx !== -1 && columns[yearIdx] ? columns[yearIdx].trim() : null,
+                    author: authorIdx !== -1 && columns[authorIdx] ? columns[authorIdx] : 'Tiada Maklumat',
+                    isbn: isbnIdx !== -1 && columns[isbnIdx] ? columns[isbnIdx] : null,
+                    publisher: pubIdx !== -1 && columns[pubIdx] ? columns[pubIdx] : null,
+                    year_published: yearIdx !== -1 && columns[yearIdx] ? columns[yearIdx] : null,
                     status: 'Available'
                 });
             }
@@ -662,6 +703,7 @@ function processCSVFile(file) {
         progressIndicator.innerText = `Menyimpan ${booksBatch.length} buah buku...`;
         await executeBulkInsert(booksBatch);
     };
+    
     reader.readAsText(file);
 }
 
@@ -671,12 +713,18 @@ async function executeBulkInsert(booksArray) {
     progressIndicator.classList.add('hidden');
 
     if (error) {
-        alert("Gagal muat naik pukal. Semak pertindihan kod bar sistem.");
+        alert("Gagal muat naik pukal. Semak pertindihan kod bar sistem pada pangkalan data.");
+        console.error("Ralat Supabase:", error);
         return;
     }
 
-    alert(`Berjaya! ${booksArray.length} rekod buku didaftarkan.`);
+    alert(`Berjaya! ${booksArray.length} rekod buku telah didaftarkan.`);
     document.getElementById('csv-file-input').value = '';
+    
+    // Auto-refresh senarai buku jika fungsi ini wujud
+    if (typeof fetchRegisteredBooks === 'function') {
+        fetchRegisteredBooks();
+    }
 }
 
 // ==========================================

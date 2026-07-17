@@ -906,3 +906,63 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* =========================================
+   GAYA CONTOH JADUAL TEMPLATE CSV
+========================================= */
+.csv-guide-box {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f7fafc;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.csv-guide-box h4 {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sample-csv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.8rem;
+}
+
+.sample-csv-table th {
+    background: #e2e8f0;
+    color: var(--text-dark);
+    font-weight: 700;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e0;
+    text-align: left;
+}
+
+.sample-csv-table td {
+    padding: 6px 10px;
+    border: 1px solid #cbd5e0;
+    color: var(--secondary-color);
+}
+
+.required-badge {
+    background: #fed7d7;
+    color: #9b2c2c;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: bold;
+}
+
+.optional-badge {
+    background: #edf2f7;
+    color: #4a5568;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: bold;
+}

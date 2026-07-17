@@ -173,17 +173,86 @@
                         </div>
                     </div>
 
-                    <!-- SUB-TAB 2: CSV BULK UPLOAD -->
+                    <!-- SUB-TAB 2: CSV BULK UPLOAD (DIKEMASKINI) -->
                     <div id="subview-csv" class="katalog-subview hidden">
                         <div class="input-card">
                             <h3>Muat Naik Fail Pukal (.CSV)</h3>
-                            <p class="subtitle">Sesuai untuk memasukkan beratus atau beribu data buku sekaligus daripada Excel.</p>
+                            <p class="subtitle">Sesuai untuk mendaftar beratus atau beribu data buku sekaligus daripada Microsoft Excel atau Google Sheets.</p>
+                            
+                            <!-- Dropzone Area -->
                             <div class="dropzone" id="csv-dropzone">
                                 <input type="file" id="csv-file-input" accept=".csv" style="display:none;">
-                                <p>Seret fail CSV anda ke sini atau <a href="#" onclick="document.getElementById('csv-file-input').click(); return false;">Pilih Fail</a></p>
-                                <small>Pastikan lajur mengandungi: barcode, title, author</small>
+                                <p style="font-size: 1.1rem; font-weight: 600; color: var(--primary-color);">
+                                    Seret fail CSV anda ke sini atau 
+                                    <a href="#" onclick="document.getElementById('csv-file-input').click(); return false;" style="text-decoration: underline;">Pilih Fail</a>
+                                </p>
+                                <small style="display: block; margin-top: 5px; color: var(--text-muted);">Sistem hanya menerima fail berformat .CSV (Comma Separated Values) sahaja.</small>
                             </div>
+                            
                             <div id="csv-progress" class="feedback-banner info hidden">Memproses baris data...</div>
+                            
+                            <!-- Elegant Instructions & Template Box -->
+                            <div class="csv-guide-box">
+                                <h4><i data-lucide="help-circle"></i> Panduan Penyediaan Fail Microsoft Excel / CSV</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
+                                    Buka perisian Excel anda, pastikan **baris pertama (Row 1)** mengandungi nama-nama lajur (*headers*) di bawah secara tepat (huruf kecil). Anda boleh memuat turun template asas atau merujuk jadual susunan lajur berikut:
+                                </p>
+                                
+                                <div style="margin-bottom: 15px;">
+                                    <a href="data:text/csv;charset=utf-8,barcode,title,author,isbn,publisher,year%0ASEKEMAS-F-00001,Buku%20Cerita%20Kanak-Kanak,Ahmad%20Bin%20Ali,9789831234567,Penerbit%20Fajar,2023" download="Template_Daftar_Buku_SEKEMAS.csv" class="btn-action btn-print" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; display: inline-flex;">
+                                        <i data-lucide="download-cloud"></i> Muat Turun Template CSV Asas
+                                    </a>
+                                </div>
+
+                                <table class="sample-csv-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Lajur (*Header*)</th>
+                                            <th>Status</th>
+                                            <th>Contoh Nilai</th>
+                                            <th>Keterangan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>barcode</strong></td>
+                                            <td><span class="required-badge">WAJIB</span></td>
+                                            <td><code style="color: #c53030; font-weight: bold;">SEKEMAS-F-00001</code></td>
+                                            <td>Kod bar fizikal / pelekat unik yang ditampal pada buku.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>title</strong></td>
+                                            <td><span class="required-badge">WAJIB</span></td>
+                                            <td><code>Sains & Teknologi, Tingkatan 5</code></td>
+                                            <td>Tajuk penuh buku (Koma di dalam tajuk dibenarkan).</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>author</strong></td>
+                                            <td><span class="optional-badge">PILIHAN</span></td>
+                                            <td><code>Dr. Halim Bin Hasan</code></td>
+                                            <td>Nama penulis utama. Nilai lalai adalah 'Tiada Maklumat' jika dikosongkan.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>isbn</strong></td>
+                                            <td><span class="optional-badge">PILIHAN</span></td>
+                                            <td><code>9780747532699</code></td>
+                                            <td>Nombor standard ISBN (kod bar kilang di belakang buku).</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>publisher</strong></td>
+                                            <td><span class="optional-badge">PILIHAN</span></td>
+                                            <td><code>Dewan Bahasa dan Pustaka</code></td>
+                                            <td>Syarikat / nama pihak penerbitan buku.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>year</strong></td>
+                                            <td><span class="optional-badge">PILIHAN</span></td>
+                                            <td><code>2022</code></td>
+                                            <td>Tahun buku diterbitkan (4 digit angka).</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
