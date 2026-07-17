@@ -1277,7 +1277,7 @@ if (triggerBtn) {
 }
 
 // ==========================================
-// PENGURUSAN REKOD BUKU DILUPUSKAN (PADAM KEKAL)
+// PENGURUSAN REKOD BUKU DILUPUSKAN (PADAM KEKAL) - DIKEMASKINI
 // ==========================================
 
 // 1. Padam SATU buku secara kekal
@@ -1296,8 +1296,8 @@ async function deleteBookPermanently(bookBarcode) {
         console.error("Ralat Delete:", error);
     } else {
         alert("Berjaya! Buku telah dipadamkan secara kekal dari sistem.");
-        // Gantikan dengan nama fungsi sebenar yang anda gunakan untuk muat semula jadual Inventori
-        if (typeof fetchDisposedBooks === 'function') fetchDisposedBooks(); 
+        // DIKEMASKINI: Muat semula jadual inventori menggunakan fungsi yang betul
+        fetchInventoryBooks(); 
     }
 }
 
@@ -1307,18 +1307,18 @@ async function deleteAllDisposedBooks() {
     
     if (!confirmDeleteAll) return;
 
-    // PASTIKAN status yang digunakan tepat ('Disposed' atau 'Dilupuskan')
+    // DIKEMASKINI: Cari dan padam berdasarkan is_active = false
     const { error } = await supabaseClient
         .from('books')
         .delete()
-        .eq('status', 'Disposed'); // Ubah kepada 'Dilupuskan' jika pangkalan data anda menggunakan ejaan Melayu
+        .eq('is_active', false); 
 
     if (error) {
         alert("Gagal memadam semua rekod. Sila semak konsol.");
         console.error("Ralat Delete All:", error);
     } else {
         alert("Berjaya! Semua rekod di dalam tong sampah telah dibersihkan.");
-        // Gantikan dengan nama fungsi sebenar yang anda gunakan untuk muat semula jadual Inventori
-        if (typeof fetchDisposedBooks === 'function') fetchDisposedBooks(); 
+        // DIKEMASKINI: Muat semula jadual inventori menggunakan fungsi yang betul
+        fetchInventoryBooks(); 
     }
 }
