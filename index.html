@@ -199,7 +199,8 @@
                                 </p>
                                 
                                 <div style="margin-bottom: 15px;">
-                                    <a href="data:text/csv;charset=utf-8,barcode,title,author,isbn,publisher,year%0ASEKEMAS-F-00001,Buku%20Cerita%20Kanak-Kanak,Ahmad%20Bin%20Ali,9789831234567,Penerbit%20Fajar,2023" download="Template_Daftar_Buku_SEKEMAS.csv" class="btn-action btn-print" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; display: inline-flex;">
+                                    <!-- Pautan ini telah dikemaskini dengan header Supabase yang sebenar -->
+                                    <a href="data:text/csv;charset=utf-8,book_barcode,title,author,isbn,publisher,year_published%0ASEKEMAS-F-00001,Puteri%20Santubong%20(Legenda%20Bumi%20Kenyalang),Ninot%20Aziz,9789672437642,Hikayat%20Fandom,2023" download="Template_Daftar_Buku_SEKEMAS.csv" class="btn-action btn-print" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; display: inline-flex;">
                                         <i data-lucide="download-cloud"></i> Muat Turun Template CSV Asas
                                     </a>
                                 </div>
@@ -215,7 +216,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><strong>barcode</strong></td>
+                                            <td><strong>book_barcode</strong></td>
                                             <td><span class="required-badge">WAJIB</span></td>
                                             <td><code style="color: #c53030; font-weight: bold;">SEKEMAS-F-00001</code></td>
                                             <td>Kod bar fizikal / pelekat unik yang ditampal pada buku.</td>
@@ -223,31 +224,31 @@
                                         <tr>
                                             <td><strong>title</strong></td>
                                             <td><span class="required-badge">WAJIB</span></td>
-                                            <td><code>Sains & Teknologi, Tingkatan 5</code></td>
+                                            <td><code>Puteri Santubong (Legenda Bumi Kenyalang)</code></td>
                                             <td>Tajuk penuh buku (Koma di dalam tajuk dibenarkan).</td>
                                         </tr>
                                         <tr>
                                             <td><strong>author</strong></td>
                                             <td><span class="optional-badge">PILIHAN</span></td>
-                                            <td><code>Dr. Halim Bin Hasan</code></td>
+                                            <td><code>Ninot Aziz</code></td>
                                             <td>Nama penulis utama. Nilai lalai adalah 'Tiada Maklumat' jika dikosongkan.</td>
                                         </tr>
                                         <tr>
                                             <td><strong>isbn</strong></td>
                                             <td><span class="optional-badge">PILIHAN</span></td>
-                                            <td><code>9780747532699</code></td>
+                                            <td><code>9789672437642</code></td>
                                             <td>Nombor standard ISBN (kod bar kilang di belakang buku).</td>
                                         </tr>
                                         <tr>
                                             <td><strong>publisher</strong></td>
                                             <td><span class="optional-badge">PILIHAN</span></td>
-                                            <td><code>Dewan Bahasa dan Pustaka</code></td>
+                                            <td><code>Hikayat Fandom</code></td>
                                             <td>Syarikat / nama pihak penerbitan buku.</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>year</strong></td>
+                                            <td><strong>year_published</strong></td>
                                             <td><span class="optional-badge">PILIHAN</span></td>
-                                            <td><code>2022</code></td>
+                                            <td><code>2023</code></td>
                                             <td>Tahun buku diterbitkan (4 digit angka).</td>
                                         </tr>
                                     </tbody>

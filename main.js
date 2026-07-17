@@ -648,24 +648,25 @@ function processCSVFile(file) {
         // Guna parseCSVRow untuk membaca Header supaya lebih tepat
         const headers = parseCSVRow(rows[0]).map(h => h.toLowerCase());
         
-        const barcodeIdx = headers.indexOf('barcode');
+        // 🌟 DIKEMASKINI: Selari dengan struktur DB Supabase
+        const barcodeIdx = headers.indexOf('book_barcode');
         const titleIdx = headers.indexOf('title');
         const authorIdx = headers.indexOf('author');
         const isbnIdx = headers.indexOf('isbn');
         const pubIdx = headers.indexOf('publisher');
-        const yearIdx = headers.indexOf('year');
+        const yearIdx = headers.indexOf('year_published');
 
+        // Semak syarat wajib
         if (barcodeIdx === -1 || titleIdx === -1) {
-            alert("Gagal! Fail mesti ada lajur: 'barcode' dan 'title'");
+            alert("Gagal! Fail mesti ada lajur: 'book_barcode' dan 'title'");
             progressIndicator.classList.add('hidden');
             return;
         }
 
         const booksBatch = [];
-        const seenBarcodes = new Set(); // Penapis keselamatan untuk elak kod bar berulang dalam fail
+        const seenBarcodes = new Set(); // Penapis keselamatan
 
         for (let i = 1; i < rows.length; i++) {
-            // Guna parseCSVRow untuk baris data supaya koma di dalam tajuk dibaca dengan selamat
             const columns = parseCSVRow(rows[i]); 
             
             if (columns.length < Math.max(barcodeIdx, titleIdx) + 1) continue; 
@@ -674,7 +675,6 @@ function processCSVFile(file) {
             const title = columns[titleIdx];
             
             if (barcode && title) {
-                // Semak jika terdapat pertindihan kod bar di dalam fail CSV yang sama
                 if (seenBarcodes.has(barcode)) {
                     console.warn(`Baris diabaikan: Duplikasi kod bar [${barcode}] dikesan dalam fail.`);
                     continue; 
@@ -683,7 +683,7 @@ function processCSVFile(file) {
 
                 booksBatch.push({
                     school_id: currentSchoolId,
-                    book_barcode: barcode,
+                    book_barcode: barcode, // Nama var & header sudah disamakan
                     title: title,
                     author: authorIdx !== -1 && columns[authorIdx] ? columns[authorIdx] : 'Tiada Maklumat',
                     isbn: isbnIdx !== -1 && columns[isbnIdx] ? columns[isbnIdx] : null,
