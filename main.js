@@ -5,7 +5,7 @@ const supabaseUrl = 'https://cawrvnutflgvbrisuqtd.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhd3J2bnV0ZmxndmJyaXN1cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwNDcwODgsImV4cCI6MjA4MTYyMzA4OH0.ZLSVVcZUl2muc584TL_UIYxykjrf_F_dOtDJp53A3cU';
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
-    auth: { persistSession: false }
+    auth: { persistSession: true }
 });
 
 // ==========================================
@@ -16,6 +16,76 @@ let currentSchoolId = '16c21780-7831-4ed8-807d-af5c65f631bd';
 let currentLibraryView = 'SIRKULASI';
 let currentLibrarian = null;
 let activeBorrower = null;
+
+// ==========================================
+// KAWALAN AUTENTIKASI (LOGIN & LOGOUT)
+// ==========================================
+async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errorDiv = document.getElementById('login-error-msg');
+    const submitBtn = document.getElementById('btn-login-submit');
+
+    errorDiv.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Mengesahkan...";
+
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) throw error;
+
+        if (data.user) {
+            showApp(data.user);
+        }
+    } catch (error) {
+        console.error("Ralat Log Masuk:", error.message);
+        errorDiv.innerText = "Log masuk gagal! Sila pastikan e-mel dan kata laluan adalah betul.";
+        errorDiv.classList.remove('hidden');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Log Masuk";
+    }
+}
+
+function showApp(user) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('main-app').classList.remove('hidden');
+    
+    // Kemaskini nama e-mel pustakawan pada lencana pengenalan sidebar
+    const userBadge = document.querySelector('.user-badge');
+    if (userBadge) {
+        userBadge.innerHTML = `Pustakawan: <strong style="color: var(--primary-color);">${user.email}</strong>`;
+    }
+    
+    // Mulakan proses memuatkan data sistem
+    fetchStudents();
+    switchLibraryView('SIRKULASI');
+}
+
+function showLogin() {
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('main-app').classList.add('hidden');
+    
+    // Bersihkan ruangan input login
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+}
+
+async function handleLogout() {
+    if (confirm("Adakah anda pasti untuk log keluar daripada sistem?")) {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            alert("Ralat semasa log keluar.");
+            return;
+        }
+        showLogin();
+    }
+}
 
 // ==========================================
 // DYNAMIC STUDENT RETRIEVAL
@@ -949,9 +1019,16 @@ function exportCSV() {
 // PUSAT KAWALAN UTAMA (INITIALIZATION)
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    await fetchStudents();
-    if (typeof focusScannerInput === 'function') focusScannerInput();
+    // 1. SEMAK STATUS SESI LOG MASUK TERKINI (SUPABASE AUTH)
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (session && session.user) {
+        showApp(session.user); // Ini akan memanggil fetchStudents() & focus/view secara automatik
+    } else {
+        showLogin();
+    }
 
+    // 2. KAWALAN INPUT PENGIMBAS (KAUNTER SIRKULASI)
     const scanInput = document.getElementById('library-scan-input');
     if (scanInput) {
         scanInput.addEventListener('keydown', async (e) => {
@@ -963,6 +1040,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // 3. KAWALAN INPUT PENGIMBAS (CARIAN ISBN DI KATALOG)
     const isbnInput = document.getElementById('isbn-input');
     if (isbnInput) {
         isbnInput.addEventListener('keydown', async (e) => {
@@ -973,15 +1051,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // 🌟 OPTIMASI IMBAHAN 1: Hantar data terus selepas imbas Kod Bar Unik (API)
+    const uniqueBarcodeInput = document.getElementById('isbn-unique-barcode');
+    if (uniqueBarcodeInput) {
+        uniqueBarcodeInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                await uploadISBNData(); // Terus simpan buku tanpa perlu klik skrin
+            }
+        });
+    }
+
+    // 🌟 OPTIMASI IMBAHAN 2: Lompat input secara automatik (Pendaftaran Manual)
+    const manualBarcode = document.getElementById('manual-barcode');
+    if (manualBarcode) {
+        manualBarcode.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const manualIsbn = document.getElementById('manual-isbn');
+                if (manualIsbn) manualIsbn.focus(); // Kursor lompat ke kotak ISBN
+            }
+        });
+    }
+
+    const manualIsbn = document.getElementById('manual-isbn');
+    if (manualIsbn) {
+        manualIsbn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const manualTitle = document.getElementById('manual-title');
+                if (manualTitle) manualTitle.focus(); // Kursor lompat ke kotak Tajuk
+            }
+        });
+    }
+
+    // 4. KAWALAN TAPISAN & CARIAN JADUAL LOG
     const filters = ['book-status-filter', 'loan-duration-filter', 'log-search-input'];
     filters.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener(id.includes('search') ? 'input' : 'change', fetchRegisteredBooks);
     });
 
+    // 5. KAWALAN CARIAN JADUAL INVENTORI
     const inventoriSearch = document.getElementById('inventori-search-input');
     if (inventoriSearch) inventoriSearch.addEventListener('input', fetchInventoryBooks);
 
+    // 6. KAWALAN PENGURUSAN CSV (DROPZONE)
     const dropzone = document.getElementById('csv-dropzone');
     const fileInput = document.getElementById('csv-file-input');
     if (dropzone && fileInput) {

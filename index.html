@@ -10,7 +10,29 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+    <!-- A. SKRIN LOG MASUK (BARU) -->
+    <div id="login-screen" class="login-container">
+        <div class="login-card">
+            <div class="login-logo">Pustaka SEKEMAS</div>
+            <div class="login-subtitle">Sistem Pengurusan Perpustakaan Pintar</div>
+            
+            <!-- Notifikasi Ralat -->
+            <div id="login-error-msg" class="login-error hidden"></div>
+            
+            <form id="login-form" class="login-form" onsubmit="handleLogin(event)">
+                <label for="login-email">E-mel Pustakawan</label>
+                <input type="email" id="login-email" required placeholder="g-xxxxxx@moe-dl.edu.my">
+                
+                <label for="login-password">Kata Laluan</label>
+                <input type="password" id="login-password" required placeholder="••••••••">
+                
+                <button type="submit" class="btn-login" id="btn-login-submit">Log Masuk</button>
+            </form>
+        </div>
+    </div>
 
+    <!-- B. UTAMA: CONTAINER SISTEM (Ditambah class hidden & id main-app) -->
+    <div class="library-container hidden" id="main-app">
     <div class="library-container">
         <!-- SIDEBAR NAVIGATION -->
         <aside class="library-sidebar">
@@ -34,7 +56,7 @@
                     <i data-lucide="archive"></i> Inventori Buku
                 </button>
             </nav>
-            <button id="btn-lib-logout" class="logout-btn" onclick="handleLibraryLogout()">Log Keluar</button>
+            <button class="logout-btn" onclick="handleLogout()">Log Keluar</button>
         </aside>
 
         <!-- MAIN DISPLAY PANELS -->
