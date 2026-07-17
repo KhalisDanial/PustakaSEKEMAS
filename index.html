@@ -208,7 +208,7 @@
                                 <option value="28">Dipinjam > 28 Hari</option>
                             </select>
 
-                            <select id="book-status-filter">
+                            <select id="book-status-filter" onchange="fetchRegisteredBooks()">
                                 <option value="all">Semua Status</option>
                                 <option value="Available">Ada di Perpustakaan</option>
                                 <option value="Borrowed">Sedang Dipinjam</option>
@@ -217,9 +217,13 @@
                             
                             <div class="search-input-wrapper">
                                 <i data-lucide="search" class="search-icon"></i>
-                                <input type="text" id="log-search-input" placeholder="Cari Tajuk / Penulis...">
+                                <input type="text" id="log-search-input" placeholder="Cari Tajuk, ISBN, Kod Bar...">
                             </div>
+
+                            <!-- ELEMEN KAUNTER BUKU BARU -->
+                            <span id="log-search-count" class="search-count-text">0 jumlah buku ditemui</span>
                         </div>
+                        
                         <div class="export-buttons">
                             <button onclick="printReport()" class="btn-action btn-print">
                                 <i data-lucide="printer"></i> Cetak / PDF
@@ -234,17 +238,18 @@
                         <table id="log-table" class="library-table">
                             <thead>
                                 <tr>
-                                    <th>Kod Bar Sistem</th> <!-- DITUKAR -->
-                                    <th>ISBN</th> <!-- DITAMBAH -->
+                                    <th style="width: 50px; text-align: center;">Bil.</th> <!-- DITAMBAH -->
+                                    <th>Kod Bar Sistem</th>
+                                    <th>ISBN</th> 
                                     <th>Tajuk Buku</th>
                                     <th>Penulis</th>
                                     <th>Status</th>
-                                    <th>Peminjam & Kelas</th> <!-- DIGABUNG -->
+                                    <th>Peminjam & Kelas</th> 
                                     <th>Tarikh Pinjam</th>
                                 </tr>
                             </thead>
                             <tbody id="books-table-body">
-                                <tr><td colspan="7" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
+                                <tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -255,63 +260,74 @@
             <section id="view-inventori" class="library-view hidden">
                 <div class="view-header">
                     <h2>Inventori Buku Terdaftar</h2>
+                    <p class="text-muted">Uruskan pendaftaran buku fizikal dan status pelupusan perpustakaan.</p>
+                </div>
+
+                <!-- BUTANG TAB INVENTORI BAHARU -->
+                <div class="katalog-tabs">
+                    <button id="btn-inv-active" class="katalog-tab-btn active" onclick="switchInventoriTab('ACTIVE')">Buku Aktif dalam Perpustakaan</button>
+                    <button id="btn-inv-inactive" class="katalog-tab-btn" onclick="switchInventoriTab('INACTIVE')">Rekod Buku Dilupuskan</button>
                 </div>
                 
-                <!-- Bahagian A: Senarai Buku Aktif -->
                 <div class="input-card">
                     <div class="filter-bar">
-                        <div class="search-input-wrapper full-width">
-                            <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" id="inventori-search-input" placeholder="Cari buku mengikut tajuk atau nama penulis...">
+                        <div class="filter-group" style="width: 100%; display: flex; gap: 15px; align-items: center;">
+                            <div class="search-input-wrapper full-width" style="flex: 1;">
+                                <i data-lucide="search" class="search-icon"></i>
+                                <input type="text" id="inventori-search-input" placeholder="Cari Tajuk, Pengarang, Kod Bar, ISBN...">
+                            </div>
+                            <!-- ELEMEN KAUNTER BUKU BARU -->
+                            <span id="inventori-search-count" class="search-count-text" style="white-space: nowrap;">0 jumlah buku ditemui</span>
                         </div>
                     </div>                    
                     
-                    <h3 class="section-title">Buku Aktif dalam Perpustakaan</h3>
-                    <div class="table-responsive">
-                        <table class="library-table">
-                            <thead>
-                                <tr>
-                                    <th>Kod Bar Sistem</th> <!-- DITUKAR -->
-                                    <th>ISBN</th> <!-- DITAMBAH -->
-                                    <th>Maklumat Buku</th> <!-- DIGABUNG (Tajuk, Penerbit & Tahun) -->
-                                    <th>Penulis</th>
-                                    <th>Status</th>
-                                    <th>Tarikh Daftar</th>
-                                    <th style="text-align: center;">Tindakan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventory-active-table-body">
-                                <!-- Data buku aktif -->
-                            </tbody>
-                        </table>
+                    <!-- SEKSYEN A: Buku Aktif -->
+                    <div id="inv-active-section" class="inventori-section">
+                        <div class="table-responsive">
+                            <table class="library-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px; text-align: center;">Bil.</th> <!-- DITAMBAH -->
+                                        <th>Kod Bar Sistem</th> 
+                                        <th>ISBN</th> 
+                                        <th>Maklumat Buku</th> 
+                                        <th>Penulis</th>
+                                        <th>Status</th>
+                                        <th>Tarikh Daftar</th>
+                                        <th style="text-align: center;">Tindakan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-active-table-body">
+                                    <tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Bahagian B: Sub-seksyen Rekod Buku Dilupuskan -->
-                <div class="input-card inactive-card">
-                    <h3 class="section-title text-muted">Rekod Buku Dilupuskan (Tidak Aktif)</h3>
-                    <p class="subtitle">Senarai di bawah memaparkan arkib buku yang telah dikeluarkan secara kekal dari inventori aktif bagi mengelakkan kerosakan pada data sejarah pinjaman sirkulasi.</p>
-                    
-                    <div class="table-responsive">
-                        <table class="library-table">
-                            <thead>
-                                <tr>
-                                    <th>Kod Bar Sistem</th> <!-- DITUKAR -->
-                                    <th>ISBN</th> <!-- DITAMBAH -->
-                                    <th>Maklumat Buku</th>
-                                    <th>Penulis</th>
-                                    <th>Tarikh Daftar</th>
-                                    <th>Tarikh Lupus</th>
-                                    <th>Status Akhir</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventory-inactive-table-body">
-                                <!-- Data buku tidak aktif -->
-                            </tbody>
-                        </table>
+                    <!-- SEKSYEN B: Rekod Buku Dilupuskan -->
+                    <div id="inv-inactive-section" class="inventori-section hidden">
+                        <div class="table-responsive">
+                            <table class="library-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px; text-align: center;">Bil.</th> <!-- DITAMBAH -->
+                                        <th>Kod Bar Sistem</th> 
+                                        <th>ISBN</th> 
+                                        <th>Maklumat Buku</th>
+                                        <th>Penulis</th>
+                                        <th>Tarikh Daftar</th>
+                                        <th>Tarikh Lupus</th>
+                                        <th>Status Akhir</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-inactive-table-body">
+                                    <tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </section>            
+            </section>           
 
             <!-- 5. TAB SEJARAH LENGKAP -->
             <section id="view-history" class="library-view hidden">

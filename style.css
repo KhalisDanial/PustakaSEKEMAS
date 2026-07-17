@@ -685,3 +685,22 @@ body {
     z-index: 9999; 
     cursor: pointer;
 }
+
+/* =========================================
+   15. ELEMEN TAMBAHAN (KAUNTER & TAB INVENTORI)
+========================================= */
+.search-count-text {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-left: 10px;
+    background: #ebf8ff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #bee3f8;
+    display: inline-block;
+}
+
+.inventori-section.hidden {
+    display: none !important;
+}

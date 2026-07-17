@@ -587,7 +587,7 @@ async function fetchRegisteredBooks() {
     const tableBody = document.getElementById('books-table-body');
     if (!tableBody) return;
 
-    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px;">Memuatkan data buku terkini...</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan data buku terkini...</td></tr>`;
 
     const filterDays = document.getElementById('loan-duration-filter')?.value || 'all';
     const filterStatus = document.getElementById('book-status-filter')?.value || 'all';
@@ -632,9 +632,14 @@ async function fetchRegisteredBooks() {
                                 (filterStatus === 'Borrowed' && book.status === 'Borrowed') || 
                                 (filterStatus === 'Overdue' && isOverdue);
             let matchesDuration = (filterDays === 'all') || (book.status === 'Borrowed' && daysElapsed > parseInt(filterDays));
+            
+            // LOGIK CARIAN DIKEMASKINI: Termasuk ISBN & Barcode
             let matchesSearch = true;
             if (searchQuery !== '') {
-                matchesSearch = (book.title || '').toLowerCase().includes(searchQuery) || (book.author || '').toLowerCase().includes(searchQuery);
+                matchesSearch = (book.title || '').toLowerCase().includes(searchQuery) || 
+                                (book.author || '').toLowerCase().includes(searchQuery) ||
+                                (book.isbn || '').toLowerCase().includes(searchQuery) ||
+                                (book.book_barcode || '').toLowerCase().includes(searchQuery);
             }
 
             if (matchesStatus && matchesDuration && matchesSearch) {
@@ -642,19 +647,23 @@ async function fetchRegisteredBooks() {
             }
         });
 
+        // Kemaskini Kaunter Teks
+        const countTextElement = document.getElementById('log-search-count');
+        if (countTextElement) countTextElement.innerText = `${filteredBooks.length} jumlah buku ditemui`;
+
         if (document.getElementById('kpi-total')) document.getElementById('kpi-total').innerText = countTotal;
         if (document.getElementById('kpi-available')) document.getElementById('kpi-available').innerText = countAvailable;
         if (document.getElementById('kpi-borrowed')) document.getElementById('kpi-borrowed').innerText = countBorrowed;
         if (document.getElementById('kpi-overdue')) document.getElementById('kpi-overdue').innerText = countOverdue;
 
         if (filteredBooks.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px; color: #718096;">Tiada padanan data ditemui.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color: #718096;">Tiada padanan data ditemui.</td></tr>`;
             return;
         }
 
         tableBody.innerHTML = '';
 
-        filteredBooks.forEach(book => {
+        filteredBooks.forEach((book, index) => {
             const tr = document.createElement('tr');
             if (book.isOverdue) {
                 tr.style.backgroundColor = '#fff5f5';
@@ -683,8 +692,9 @@ async function fetchRegisteredBooks() {
                 }
             }
 
-            // MENGGUNAKAN JADUAL BAHARU
+            // MENGGUNAKAN JADUAL BAHARU DENGAN PENOMBORAN (index + 1)
             tr.innerHTML = `
+                <td style="padding: 12px; text-align: center; color: #718096; font-weight: bold;">${index + 1}</td>
                 <td style="padding: 12px; font-family: monospace; font-weight: bold; color: #2b6cb0;">${book.book_barcode || '-'}</td>
                 <td style="padding: 12px; font-family: monospace; font-size: 0.85rem; color: #718096;">${book.isbn || '-'}</td>
                 <td style="padding: 12px; font-weight: 500; color: ${book.isOverdue ? '#c53030' : 'inherit'};">${book.title || 'Tiada Tajuk'}</td>
@@ -776,8 +786,8 @@ async function fetchInventoryBooks() {
     const inactiveTableBody = document.getElementById('inventory-inactive-table-body');
     if (!activeTableBody || !inactiveTableBody) return;
 
-    activeTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px;">Memuatkan senarai buku aktif...</td></tr>`;
-    inactiveTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px;">Memuatkan rekod buku dilupuskan...</td></tr>`;
+    activeTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan senarai buku aktif...</td></tr>`;
+    inactiveTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan rekod buku dilupuskan...</td></tr>`;
 
     const searchQuery = document.getElementById('inventori-search-input')?.value.toLowerCase().trim() || '';
 
@@ -791,19 +801,29 @@ async function fetchInventoryBooks() {
         if (error) throw error;
         activeTableBody.innerHTML = ''; inactiveTableBody.innerHTML = '';
 
+        // LOGIK CARIAN DIKEMASKINI: Termasuk ISBN & Barcode
         let displayedBooks = books;
         if (searchQuery !== '') {
-            displayedBooks = books.filter(book => (book.title || '').toLowerCase().includes(searchQuery) || (book.author || '').toLowerCase().includes(searchQuery));
+            displayedBooks = books.filter(book => 
+                (book.title || '').toLowerCase().includes(searchQuery) || 
+                (book.author || '').toLowerCase().includes(searchQuery) ||
+                (book.isbn || '').toLowerCase().includes(searchQuery) ||
+                (book.book_barcode || '').toLowerCase().includes(searchQuery)
+            );
         }
+
+        // Kemaskini Kaunter Teks Inventori
+        const countTextElement = document.getElementById('inventori-search-count');
+        if (countTextElement) countTextElement.innerText = `${displayedBooks.length} jumlah buku ditemui`;
 
         const activeBooks = displayedBooks.filter(b => b.is_active !== false);
         const inactiveBooks = displayedBooks.filter(b => b.is_active === false);
 
         // 1. PAPARAN JADUAL BUKU AKTIF
         if (activeBooks.length === 0) {
-            activeTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px; color: #718096;">Tiada padanan buku aktif.</td></tr>`;
+            activeTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color: #718096;">Tiada padanan buku aktif.</td></tr>`;
         } else {
-            activeBooks.forEach(book => {
+            activeBooks.forEach((book, index) => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = '1px solid #e2e8f0';
 
@@ -815,6 +835,7 @@ async function fetchInventoryBooks() {
                     : `<span style="background-color: #bee3f8; color: #2a4365; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">Dipinjam</span>`;
 
                 tr.innerHTML = `
+                    <td style="padding: 12px; text-align: center; color: #718096; font-weight: bold;">${index + 1}</td>
                     <td style="padding: 12px; font-family: monospace; font-weight: bold; color: #2b6cb0;">${book.book_barcode || '-'}</td>
                     <td style="padding: 12px; font-family: monospace; font-size: 0.85rem; color: #718096;">${book.isbn || '-'}</td>
                     <td style="padding: 12px;">
@@ -836,9 +857,9 @@ async function fetchInventoryBooks() {
 
         // 2. PAPARAN JADUAL BUKU TIDAK AKTIF (DILUPUSKAN)
         if (inactiveBooks.length === 0) {
-            inactiveTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px; color: #cbd5e0;">Tiada rekod pelupusan buku.</td></tr>`;
+            inactiveTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color: #cbd5e0;">Tiada rekod pelupusan buku.</td></tr>`;
         } else {
-            inactiveBooks.forEach(book => {
+            inactiveBooks.forEach((book, index) => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = '1px solid #edf2f7';
                 tr.style.backgroundColor = '#fcfcfc';
@@ -847,6 +868,7 @@ async function fetchInventoryBooks() {
                 const removalDateStr = book.updated_at ? new Date(book.updated_at).toLocaleDateString('ms-MY') : '-';
 
                 tr.innerHTML = `
+                    <td style="padding: 12px; text-align: center; color: #a0aec0; font-weight: bold;">${index + 1}</td>
                     <td style="padding: 12px; font-family: monospace; color: #a0aec0;">${book.book_barcode || '-'}</td>
                     <td style="padding: 12px; font-family: monospace; font-size: 0.85rem; color: #a0aec0;">${book.isbn || '-'}</td>
                     <td style="padding: 12px; text-decoration: line-through; color: #a0aec0;">
@@ -865,6 +887,20 @@ async function fetchInventoryBooks() {
         }
     } catch (error) {
         console.error("Ralat membina senarai inventori:", error);
+    }
+}
+
+function switchInventoriTab(tab) {
+    if (tab === 'ACTIVE') {
+        document.getElementById('inv-active-section').classList.remove('hidden');
+        document.getElementById('inv-inactive-section').classList.add('hidden');
+        document.getElementById('btn-inv-active').classList.add('active');
+        document.getElementById('btn-inv-inactive').classList.remove('active');
+    } else {
+        document.getElementById('inv-active-section').classList.add('hidden');
+        document.getElementById('inv-inactive-section').classList.remove('hidden');
+        document.getElementById('btn-inv-active').classList.remove('active');
+        document.getElementById('btn-inv-inactive').classList.add('active');
     }
 }
 
