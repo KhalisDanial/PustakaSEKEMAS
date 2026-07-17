@@ -669,29 +669,38 @@ function processCSVFile(file) {
         for (let i = 1; i < rows.length; i++) {
             const columns = parseCSVRow(rows[i]); 
             
-            if (columns.length < Math.max(barcodeIdx, titleIdx) + 1) continue; 
+            // 1. Semak jika lajur mencukupi untuk semua data wajib (termasuk author & isbn)
+            if (columns.length <= Math.max(barcodeIdx, titleIdx, authorIdx, isbnIdx)) continue; 
 
             const barcode = columns[barcodeIdx];
             const title = columns[titleIdx];
+            const author = columns[authorIdx];
+            const isbn = columns[isbnIdx];
             
-            if (barcode && title) {
-                if (seenBarcodes.has(barcode)) {
-                    console.warn(`Baris diabaikan: Duplikasi kod bar [${barcode}] dikesan dalam fail.`);
-                    continue; 
-                }
-                seenBarcodes.add(barcode);
-
-                booksBatch.push({
-                    school_id: currentSchoolId,
-                    book_barcode: barcode, // Nama var & header sudah disamakan
-                    title: title,
-                    author: authorIdx !== -1 && columns[authorIdx] ? columns[authorIdx] : 'Tiada Maklumat',
-                    isbn: isbnIdx !== -1 && columns[isbnIdx] ? columns[isbnIdx] : null,
-                    publisher: pubIdx !== -1 && columns[pubIdx] ? columns[pubIdx] : null,
-                    year_published: yearIdx !== -1 && columns[yearIdx] ? columns[yearIdx] : null,
-                    status: 'Available'
-                });
+            // 2. VALIDASI WAJIB: Pastikan data tidak kosong (Fizikal & Logik)
+            if (!barcode || !title || !author || !isbn) {
+                console.warn(`Baris ${i} diabaikan: Data wajib (barcode, title, author, atau isbn) tidak lengkap.`);
+                continue; // Langkau baris ini jika mana-mana data wajib tiada
             }
+
+            // 3. Semak duplikasi kod bar
+            if (seenBarcodes.has(barcode)) {
+                console.warn(`Baris ${i} diabaikan: Duplikasi kod bar [${barcode}] dikesan dalam fail.`);
+                continue; 
+            }
+            seenBarcodes.add(barcode);
+
+            // 4. Masukkan ke dalam batch (Semua data wajib kini dijamin ada)
+            booksBatch.push({
+                school_id: currentSchoolId,
+                book_barcode: barcode,
+                title: title,
+                author: author,        // Tiada lagi 'Tiada Maklumat' (kerana wajib)
+                isbn: isbn,            // Tiada lagi 'null' (kerana wajib)
+                publisher: pubIdx !== -1 && columns[pubIdx] ? columns[pubIdx] : null,
+                year_published: yearIdx !== -1 && columns[yearIdx] ? columns[yearIdx] : null,
+                status: 'Available'
+            });
         }
 
         if (booksBatch.length === 0) {
