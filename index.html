@@ -38,13 +38,13 @@
             <h2>Perpustakaan</h2>
             <div class="user-badge">Staf: <span id="librarian-email">-</span></div>
             <hr>
-            <!-- SIDEBAR NAVIGATION -->
+            <!-- SIDEBAR NAVIGATION (DIKEMASKINI UNTUK TABLET) -->
             <nav>
                 <button id="btn-nav-sirkulasi" class="nav-btn active" onclick="switchLibraryView('SIRKULASI')">
                     <span class="nav-label">
                         <i data-lucide="book-open"></i> Kaunter Sirkulasi
                     </span>
-                    <span class="info-btn" data-tooltip="Kaunter utama untuk proses imbasan pinjam dan pulang buku murid secara pantas." onclick="event.stopPropagation()">
+                    <span class="info-btn" data-tooltip="Kaunter utama untuk proses imbasan pinjam dan pulang buku murid secara pantas." onclick="handleInfoClick(event, this)">
                         <i data-lucide="info"></i>
                     </span>
                 </button>
@@ -53,7 +53,7 @@
                     <span class="nav-label">
                         <i data-lucide="library"></i> Pendaftaran Buku
                     </span>
-                    <span class="info-btn" data-tooltip="Daftar buku baharu ke dalam sistem via API ISBN, fail CSV pukal, atau manual." onclick="event.stopPropagation()">
+                    <span class="info-btn" data-tooltip="Daftar buku baharu ke dalam sistem via API ISBN, fail CSV pukal, atau manual." onclick="handleInfoClick(event, this)">
                         <i data-lucide="info"></i>
                     </span>
                 </button>
@@ -62,7 +62,7 @@
                     <span class="nav-label">
                         <i data-lucide="activity"></i> Log Pinjaman (Live)
                     </span>
-                    <span class="info-btn" data-tooltip="Paparan masa-nyata status buku semasa (Ada/Dipinjam/Lewat) & KPI perpustakaan." onclick="event.stopPropagation()">
+                    <span class="info-btn" data-tooltip="Paparan masa-nyata status buku semasa (Ada/Dipinjam/Lewat) & KPI perpustakaan." onclick="handleInfoClick(event, this)">
                         <i data-lucide="info"></i>
                     </span>
                 </button>
@@ -71,7 +71,7 @@
                     <span class="nav-label">
                         <i data-lucide="calendar-clock"></i> Sejarah Pinjaman
                     </span>
-                    <span class="info-btn" data-tooltip="Rekod lengkap aktiviti sirkulasi lampau untuk tujuan semakan dan rujukan." onclick="event.stopPropagation()">
+                    <span class="info-btn" data-tooltip="Rekod lengkap aktiviti sirkulasi lampau untuk tujuan semakan dan rujukan." onclick="handleInfoClick(event, this)">
                         <i data-lucide="info"></i>
                     </span>
                 </button>
@@ -80,7 +80,7 @@
                     <span class="nav-label">
                         <i data-lucide="archive"></i> Inventori Buku
                     </span>
-                    <span class="info-btn" data-tooltip="Urus senarai fizikal semua buku sekolah termasuk proses melupuskan buku yang hilang/rosak." onclick="event.stopPropagation()">
+                    <span class="info-btn" data-tooltip="Urus senarai fizikal semua buku sekolah termasuk proses melupuskan buku yang hilang/rosak." onclick="handleInfoClick(event, this)">
                         <i data-lucide="info"></i>
                     </span>
                 </button>

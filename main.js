@@ -1044,6 +1044,21 @@ function exportCSV() {
     document.body.removeChild(link);
 }
 
+// ==========================================================
+// KAWALAN POP-UP INFO KHAS UNTUK SKRIN TABLET / TELEFON (FIX)
+// ==========================================================
+function handleInfoClick(event, element) {
+    event.stopPropagation(); // Menghalang navigasi bertukar skrin secara tidak sengaja
+
+    // Hanya aktifkan modal popup sekiranya peranti berada dalam mod tablet/telefon
+    if (window.innerWidth <= 992) {
+        const infoMessage = element.getAttribute('data-tooltip');
+        
+        // Memaparkan info menggunakan dialog sistem yang bersih & anti-terpotong
+        alert(`ℹ️ Info Bahagian:\n\n${infoMessage}`);
+    }
+}
+
 // ==========================================
 // PUSAT KAWALAN UTAMA (INITIALIZATION)
 // ==========================================
