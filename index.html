@@ -427,11 +427,18 @@
 
                     <!-- SEKSYEN B: Rekod Buku Dilupuskan -->
                     <div id="inv-inactive-section" class="inventori-section hidden">
+                        <!-- Butang Kosongkan Semua (Diletakkan di luar jadual supaya lebih kemas) -->
+                        <div style="margin-bottom: 15px; display: flex; justify-content: flex-end;">
+                            <button class="btn-action" style="background-color: #e53e3e; color: white;" onclick="deleteAllDisposedBooks()">
+                                <i data-lucide="trash-2"></i> Kosongkan Rekod Dilupuskan
+                            </button>                            
+                        </div>
+
                         <div class="table-responsive">
                             <table class="library-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 50px; text-align: center;">Bil.</th> <!-- DITAMBAH -->
+                                        <th style="width: 50px; text-align: center;">Bil.</th>
                                         <th>Kod Bar Sistem</th> 
                                         <th>ISBN</th> 
                                         <th>Maklumat Buku</th>
@@ -439,10 +446,11 @@
                                         <th>Tarikh Daftar</th>
                                         <th>Tarikh Lupus</th>
                                         <th>Status Akhir</th>
+                                        <th style="text-align: center;">Tindakan</th> <!-- Tambah lajur ini -->
                                     </tr>
                                 </thead>
                                 <tbody id="inventory-inactive-table-body">
-                                    <tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
+                                    <tr><td colspan="9" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
                                 </tbody>
                             </table>
                         </div>

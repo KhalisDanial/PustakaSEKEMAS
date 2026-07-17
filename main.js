@@ -709,22 +709,64 @@ function processCSVFile(file) {
 
 async function executeBulkInsert(booksArray) {
     const progressIndicator = document.getElementById('csv-progress');
-    const { error } = await supabaseClient.from('books').insert(booksArray);
+    
+    // 1. Himpunkan senarai kod bar dari CSV untuk semakan
+    const barcodesToCheck = booksArray.map(book => book.book_barcode);
+
+    // 2. Semak pangkalan data Supabase jika kod bar ini sudah wujud
+    progressIndicator.innerText = "Menyemak pertindihan kod bar...";
+    const { data: existingBooks, error: checkError } = await supabaseClient
+        .from('books')
+        .select('book_barcode, status')
+        .in('book_barcode', barcodesToCheck);
+
+    if (checkError) {
+        alert("Ralat sistem ketika menyemak data pangkalan data.");
+        progressIndicator.classList.add('hidden');
+        return;
+    }
+
+    // 3. Logik Amaran Pintar Jika Wujud Pertindihan
+    if (existingBooks && existingBooks.length > 0) {
+        // NOTA: Sila pastikan perkataan status di bawah sama dengan apa yang disimpan
+        // dalam pangkalan data anda (contohnya: 'Disposed', 'Dilupuskan', atau 'Lost')
+        const disposedBooks = existingBooks.filter(b => b.status === 'Disposed' || b.status === 'Dilupuskan');
+        const activeBooks = existingBooks.filter(b => b.status !== 'Disposed' && b.status !== 'Dilupuskan');
+
+        // Jika buku yang bertindih itu berada di tong sampah (Dilupuskan)
+        if (disposedBooks.length > 0) {
+            const disposedList = disposedBooks.map(b => b.book_barcode).join('\n• ');
+            alert(`MUAT NAIK TERHENTI!\n\nKod bar di bawah telah wujud tetapi berada di dalam "Rekod Buku Dilupuskan":\n\n• ${disposedList}\n\nSila pergi ke tab INVENTORI, cari buku ini, dan klik "Padam Kekal" terlebih dahulu sebelum memuat naik semula.`);
+            progressIndicator.classList.add('hidden');
+            return; // Hentikan muat naik
+        }
+
+        // Jika buku yang bertindih itu adalah buku yang sedang aktif di rak
+        if (activeBooks.length > 0) {
+            const activeList = activeBooks.map(b => b.book_barcode).join('\n• ');
+            alert(`MUAT NAIK TERHENTI!\n\nKod bar di bawah telah wujud dan sedang AKTIF di dalam sistem:\n\n• ${activeList}\n\nSila semak semula fail CSV anda untuk mengelakkan pertindihan.`);
+            progressIndicator.classList.add('hidden');
+            return; // Hentikan muat naik
+        }
+    }
+
+    // 4. Jika tiada pertindihan, teruskan proses muat naik sebenar (Insert)
+    progressIndicator.innerText = `Menyimpan ${booksArray.length} buah buku ke pangkalan data...`;
+    const { error: insertError } = await supabaseClient.from('books').insert(booksArray);
+    
     progressIndicator.classList.add('hidden');
 
-    if (error) {
-        alert("Gagal muat naik pukal. Semak pertindihan kod bar sistem pada pangkalan data.");
-        console.error("Ralat Supabase:", error);
+    if (insertError) {
+        alert("Gagal muat naik pukal. Ralat pelayan Supabase.");
+        console.error("Ralat Supabase:", insertError);
         return;
     }
 
     alert(`Berjaya! ${booksArray.length} rekod buku telah didaftarkan.`);
     document.getElementById('csv-file-input').value = '';
     
-    // Auto-refresh senarai buku jika fungsi ini wujud
-    if (typeof fetchRegisteredBooks === 'function') {
-        fetchRegisteredBooks();
-    }
+    // Auto-refresh jadual
+    if (typeof fetchRegisteredBooks === 'function') fetchRegisteredBooks();
 }
 
 // ==========================================
@@ -1004,7 +1046,7 @@ async function fetchInventoryBooks() {
 
         // 2. PAPARAN JADUAL BUKU TIDAK AKTIF (DILUPUSKAN)
         if (inactiveBooks.length === 0) {
-            inactiveTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color: #cbd5e0;">Tiada rekod pelupusan buku.</td></tr>`;
+            inactiveTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:15px; color: #cbd5e0;">Tiada rekod pelupusan buku.</td></tr>`;
         } else {
             inactiveBooks.forEach((book, index) => {
                 const tr = document.createElement('tr');
@@ -1027,6 +1069,10 @@ async function fetchInventoryBooks() {
                     <td style="padding: 12px; color: #e53e3e; font-size: 0.9rem; font-weight: bold;">${removalDateStr}</td>
                     <td style="padding: 12px;">
                         <span style="background-color: #fed7d7; color: #9b2c2c; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Dilupuskan</span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <!-- BUTANG PADAM KEKAL DIMASUKKAN DI SINI -->
+                        <button style="background: #c53030; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold;" onclick="deleteBookPermanently('${book.book_barcode}')">Padam Kekal</button>
                     </td>
                 `;
                 inactiveTableBody.appendChild(tr);
@@ -1228,4 +1274,51 @@ if (triggerBtn) {
             alert(isCurrentlyLocked ? "Sistem Dibuka (Admin Mode)" : "Sistem Dikunci (Kiosk Mode)");
         }
     });
+}
+
+// ==========================================
+// PENGURUSAN REKOD BUKU DILUPUSKAN (PADAM KEKAL)
+// ==========================================
+
+// 1. Padam SATU buku secara kekal
+async function deleteBookPermanently(bookBarcode) {
+    const confirmDelete = confirm(`AMARAN KRITIKAL!\n\nAdakah anda pasti mahu memadam buku [${bookBarcode}] secara KEKAL dari pangkalan data?\n\nTindakan ini tidak boleh dipulihkan.`);
+    
+    if (!confirmDelete) return;
+
+    const { error } = await supabaseClient
+        .from('books')
+        .delete()
+        .eq('book_barcode', bookBarcode);
+
+    if (error) {
+        alert("Gagal memadam rekod buku secara kekal.");
+        console.error("Ralat Delete:", error);
+    } else {
+        alert("Berjaya! Buku telah dipadamkan secara kekal dari sistem.");
+        // Gantikan dengan nama fungsi sebenar yang anda gunakan untuk muat semula jadual Inventori
+        if (typeof fetchDisposedBooks === 'function') fetchDisposedBooks(); 
+    }
+}
+
+// 2. Padam SEMUA buku yang dilupuskan secara serentak
+async function deleteAllDisposedBooks() {
+    const confirmDeleteAll = confirm(`AMARAN KRITIKAL!\n\nAdakah anda pasti mahu mengosongkan SEMUA "Rekod Buku Dilupuskan" secara KEKAL?\n\nTindakan ini akan membuang data dari Supabase sepenuhnya.`);
+    
+    if (!confirmDeleteAll) return;
+
+    // PASTIKAN status yang digunakan tepat ('Disposed' atau 'Dilupuskan')
+    const { error } = await supabaseClient
+        .from('books')
+        .delete()
+        .eq('status', 'Disposed'); // Ubah kepada 'Dilupuskan' jika pangkalan data anda menggunakan ejaan Melayu
+
+    if (error) {
+        alert("Gagal memadam semua rekod. Sila semak konsol.");
+        console.error("Ralat Delete All:", error);
+    } else {
+        alert("Berjaya! Semua rekod di dalam tong sampah telah dibersihkan.");
+        // Gantikan dengan nama fungsi sebenar yang anda gunakan untuk muat semula jadual Inventori
+        if (typeof fetchDisposedBooks === 'function') fetchDisposedBooks(); 
+    }
 }
