@@ -80,10 +80,12 @@ body {
 }
 
 /* =========================================
-   4. BUTANG NAVIGASI (SIDEBAR)
+   4. BUTANG NAVIGASI (SIDEBAR) - DIKEMASKINI
 ========================================= */
 .nav-btn {
-    display: block;
+    display: flex; /* Ditukar ke flex untuk menyusun label & ikon info */
+    align-items: center;
+    justify-content: space-between; /* Menolak ikon "i" ke hujung kanan butang */
     width: 100%;
     padding: 12px 15px;
     margin-bottom: 8px;
@@ -96,6 +98,7 @@ body {
     color: var(--secondary-color);
     cursor: pointer;
     transition: all 0.2s ease;
+    position: relative; /* Wajib untuk rujukan kedudukan Tooltip */
 }
 
 .nav-btn:hover {
@@ -109,6 +112,100 @@ body {
     box-shadow: 0 4px 6px rgba(43, 108, 176, 0.2);
 }
 
+/* Bekas Label dalam Butang Navigasi */
+.nav-label {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Jarak antara ikon menu dan teks */
+}
+
+/* Memastikan ikon Lucide asal tidak lari susunannya */
+.nav-label .lucide {
+    margin-right: 0 !important;
+}
+
+/* =========================================
+   GAYA BUTANG & TOOLTIP INFO ("i")
+========================================= */
+.info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    padding: 2px;
+    border-radius: 50%;
+    cursor: help; /* Kursor bertukar kepada simbol bantuan (?) */
+    position: relative;
+}
+
+.info-btn .lucide {
+    width: 14px;
+    height: 14px;
+}
+
+.info-btn:hover {
+    color: var(--primary-color);
+    transform: scale(1.2); /* Kesan membesar sedikit apabila di-hover */
+}
+
+/* Larasan warna ikon info semasa navigasi aktif */
+.nav-btn.active .info-btn {
+    color: rgba(255, 255, 255, 0.7);
+}
+.nav-btn.active .info-btn:hover {
+    color: white;
+}
+
+/* 💬 Kotak Penerangan Tooltip */
+.info-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 140%; /* Dipaparkan di sebelah kanan sidebar */
+    top: 50%;
+    transform: translateY(-50%) scale(0.8);
+    background-color: #1a202c; /* Warna hitam matte yang premium */
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    width: 220px; /* Lebar kotak tooltip */
+    white-space: normal; /* Membenarkan teks turun ke baris baharu */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 9999;
+}
+
+/* 📐 Anak Panah Segitiga Tooltip */
+.info-btn::before {
+    content: '';
+    position: absolute;
+    left: 115%;
+    top: 50%;
+    transform: translateY(-50%) scale(0.8);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent #1a202c transparent transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 9999;
+}
+
+/* Paparkan Tooltip apabila tetikus di-hover */
+.info-btn:hover::after,
+.info-btn:hover::before {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+/* =========================================
+   GAYA BUTANG LOG KELUAR (KEKAL SEPERTI ASAL)
+========================================= */
 .logout-btn {
     margin-top: auto;
     padding: 12px;

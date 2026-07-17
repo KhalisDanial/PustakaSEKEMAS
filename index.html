@@ -38,21 +38,51 @@
             <h2>Perpustakaan</h2>
             <div class="user-badge">Staf: <span id="librarian-email">-</span></div>
             <hr>
+            <!-- SIDEBAR NAVIGATION -->
             <nav>
                 <button id="btn-nav-sirkulasi" class="nav-btn active" onclick="switchLibraryView('SIRKULASI')">
-                    <i data-lucide="book-open"></i> Kaunter Sirkulasi
+                    <span class="nav-label">
+                        <i data-lucide="book-open"></i> Kaunter Sirkulasi
+                    </span>
+                    <span class="info-btn" data-tooltip="Kaunter utama untuk proses imbasan pinjam dan pulang buku murid secara pantas." onclick="event.stopPropagation()">
+                        <i data-lucide="info"></i>
+                    </span>
                 </button>
+                
                 <button id="btn-nav-katalog" class="nav-btn" onclick="switchLibraryView('KATALOG')">
-                    <i data-lucide="library"></i> Pendaftaran Buku
+                    <span class="nav-label">
+                        <i data-lucide="library"></i> Pendaftaran Buku
+                    </span>
+                    <span class="info-btn" data-tooltip="Daftar buku baharu ke dalam sistem via API ISBN, fail CSV pukal, atau manual." onclick="event.stopPropagation()">
+                        <i data-lucide="info"></i>
+                    </span>
                 </button>
+                
                 <button id="btn-nav-log" class="nav-btn" onclick="switchLibraryView('LOG')">
-                    <i data-lucide="activity"></i> Log Pinjaman (Live)
+                    <span class="nav-label">
+                        <i data-lucide="activity"></i> Log Pinjaman (Live)
+                    </span>
+                    <span class="info-btn" data-tooltip="Paparan masa-nyata status buku semasa (Ada/Dipinjam/Lewat) & KPI perpustakaan." onclick="event.stopPropagation()">
+                        <i data-lucide="info"></i>
+                    </span>
                 </button>
+                
                 <button id="btn-nav-history" onclick="switchLibraryView('HISTORY')" class="nav-btn">
-                    <i data-lucide="calendar-clock"></i> Sejarah Pinjaman
+                    <span class="nav-label">
+                        <i data-lucide="calendar-clock"></i> Sejarah Pinjaman
+                    </span>
+                    <span class="info-btn" data-tooltip="Rekod lengkap aktiviti sirkulasi lampau untuk tujuan semakan dan rujukan." onclick="event.stopPropagation()">
+                        <i data-lucide="info"></i>
+                    </span>
                 </button>
+                
                 <button id="btn-nav-inventori" class="nav-btn" onclick="switchLibraryView('INVENTORI')">
-                    <i data-lucide="archive"></i> Inventori Buku
+                    <span class="nav-label">
+                        <i data-lucide="archive"></i> Inventori Buku
+                    </span>
+                    <span class="info-btn" data-tooltip="Urus senarai fizikal semua buku sekolah termasuk proses melupuskan buku yang hilang/rosak." onclick="event.stopPropagation()">
+                        <i data-lucide="info"></i>
+                    </span>
                 </button>
             </nav>
             <button class="logout-btn" onclick="handleLogout()">Log Keluar</button>
