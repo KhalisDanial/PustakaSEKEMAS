@@ -1293,7 +1293,7 @@ if (triggerBtn) {
 }
 
 // ==========================================
-// PENGURUSAN REKOD BUKU DILUPUSKAN (PADAM KEKAL) - DIKEMASKINI
+// PENGURUSAN REKOD BUKU DILUPUSKAN (PADAM KEKAL) - DIKEMASKINI (ANTI-CRASH)
 // ==========================================
 
 // 1. Padam SATU buku secara kekal
@@ -1302,17 +1302,35 @@ async function deleteBookPermanently(bookBarcode) {
     
     if (!confirmDelete) return;
 
+    // LANGKAH 1: Dapatkan ID (Primary Key) buku tersebut
+    const { data: book, error: fetchError } = await supabaseClient
+        .from('books')
+        .select('id')
+        .eq('book_barcode', bookBarcode)
+        .single();
+
+    if (fetchError || !book) {
+        alert("Ralat: Gagal mencari buku di dalam pangkalan data.");
+        return;
+    }
+
+    // LANGKAH 2: Padam sejarah pinjaman (child records) buku ini terlebih dahulu
+    await supabaseClient
+        .from('library_loans')
+        .delete()
+        .eq('book_id', book.id);
+
+    // LANGKAH 3: Padam rekod fizikal buku
     const { error } = await supabaseClient
         .from('books')
         .delete()
-        .eq('book_barcode', bookBarcode);
+        .eq('id', book.id);
 
     if (error) {
         alert("Gagal memadam rekod buku secara kekal.");
         console.error("Ralat Delete:", error);
     } else {
-        alert("Berjaya! Buku telah dipadamkan secara kekal dari sistem.");
-        // DIKEMASKINI: Muat semula jadual inventori menggunakan fungsi yang betul
+        alert("Berjaya! Buku dan sejarahnya telah dipadamkan secara kekal dari sistem.");
         fetchInventoryBooks(); 
     }
 }
@@ -1323,18 +1341,42 @@ async function deleteAllDisposedBooks() {
     
     if (!confirmDeleteAll) return;
 
-    // DIKEMASKINI: Cari dan padam berdasarkan is_active = false
+    // LANGKAH 1: Kenal pasti semua ID buku di dalam tong sampah (is_active = false)
+    const { data: disposedBooks, error: fetchError } = await supabaseClient
+        .from('books')
+        .select('id')
+        .eq('is_active', false);
+
+    if (fetchError) {
+        alert("Gagal menyemak rekod dilupuskan.");
+        return;
+    }
+
+    if (!disposedBooks || disposedBooks.length === 0) {
+        alert("Tiada buku di dalam rekod dilupuskan untuk dipadam.");
+        return;
+    }
+
+    // Ekstrak ID sahaja ke dalam bentuk array (Contoh: [12, 45, 87])
+    const bookIds = disposedBooks.map(b => b.id);
+
+    // LANGKAH 2: Bersihkan semua sejarah pinjaman yang berkaitan secara serentak
+    await supabaseClient
+        .from('library_loans')
+        .delete()
+        .in('book_id', bookIds);
+
+    // LANGKAH 3: Padam semua buku tersebut
     const { error } = await supabaseClient
         .from('books')
         .delete()
-        .eq('is_active', false); 
+        .in('id', bookIds); 
 
     if (error) {
         alert("Gagal memadam semua rekod. Sila semak konsol.");
         console.error("Ralat Delete All:", error);
     } else {
         alert("Berjaya! Semua rekod di dalam tong sampah telah dibersihkan.");
-        // DIKEMASKINI: Muat semula jadual inventori menggunakan fungsi yang betul
         fetchInventoryBooks(); 
     }
 }
