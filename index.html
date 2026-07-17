@@ -13,7 +13,7 @@
     <!-- A. SKRIN LOG MASUK (BARU) -->
     <div id="login-screen" class="login-container">
         <div class="login-card">
-            <div class="login-logo">Pustaka SEKEMAS</div>
+            <div class="login-logo">PustakaSEKEMAS</div>
             <div class="login-subtitle">Sistem Pengurusan Perpustakaan Berpusat</div>
             
             <!-- Notifikasi Ralat -->
@@ -36,7 +36,17 @@
         <!-- SIDEBAR NAVIGATION -->
         <aside class="library-sidebar">
             <h2>PustakaSEKEMAS</h2>
-            <div class="user-badge">Staf: <span id="librarian-email">-</span></div>
+            
+            <!-- STRUKTUR BAHARU UNTUK NAMA & BUTANG LOG KELUAR (MOBILE) -->
+            <div class="mobile-header-container">
+                <div class="user-badge">Staf: <span id="librarian-email">-</span></div>
+                
+                <!-- Butang Log Keluar Khas Mobile -->
+                <button class="logout-btn-mobile" onclick="handleLogout()">
+                    <i data-lucide="log-out"></i>
+                </button>
+            </div>
+
             <hr>
             <!-- SIDEBAR NAVIGATION (DIKEMASKINI UNTUK TABLET) -->
             <nav>

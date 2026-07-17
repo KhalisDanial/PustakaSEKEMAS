@@ -966,3 +966,51 @@ body {
     font-size: 0.65rem;
     font-weight: bold;
 }
+
+/* =========================================
+   18. GAYA BUTANG LOG KELUAR (MOBILE / TABLET)
+========================================= */
+.mobile-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* Sembunyikan butang mobile ini pada paparan PC */
+.logout-btn-mobile {
+    display: none; 
+}
+
+/* Hanya paparkan pada Tablet & Telefon (skrin bawah 992px) */
+@media (max-width: 992px) {
+    .logout-btn-mobile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fed7d7;
+        color: #c53030;
+        border: 1px solid #fc8181;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .logout-btn-mobile:active {
+        background-color: #c53030;
+        color: white;
+    }
+    
+    .logout-btn-mobile .lucide {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+    }
+    
+    /* Betulkan margin nama supaya tidak rapat sangat dengan butang */
+    .user-badge {
+        margin-bottom: 0 !important;
+    }
+}
