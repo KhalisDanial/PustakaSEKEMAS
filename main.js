@@ -1039,9 +1039,14 @@ async function fetchInventoryBooks() {
                     ? `<span style="background-color: #c6f6d5; color: #22543d; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">Ada</span>`
                     : `<span style="background-color: #bee3f8; color: #2a4365; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">Dipinjam</span>`;
 
+                // DATA ENCODING UNTUK MODAL
+                const bookDataEncoded = encodeURIComponent(JSON.stringify(book));
+
                 tr.innerHTML = `
                     <td style="padding: 12px; text-align: center; color: #718096; font-weight: bold;">${index + 1}</td>
-                    <td style="padding: 12px; font-family: monospace; font-weight: bold; color: #2b6cb0;">${book.book_barcode || '-'}</td>
+                    <td style="padding: 12px; font-family: monospace; font-weight: bold; color: #2b6cb0;">
+                        <span class="clickable-barcode" onclick="openBookModal('${bookDataEncoded}')">${book.book_barcode || '-'}</span>
+                    </td>
                     <td style="padding: 12px; font-family: monospace; font-size: 0.85rem; color: #718096;">${book.isbn || '-'}</td>
                     <td style="padding: 12px;">
                         <div style="font-weight: 500; color: #2d3748;">${book.title || 'Tiada Tajuk'}</div>
@@ -1071,10 +1076,15 @@ async function fetchInventoryBooks() {
 
                 const regDateStr = new Date(book.created_at).toLocaleDateString('ms-MY');
                 const removalDateStr = book.updated_at ? new Date(book.updated_at).toLocaleDateString('ms-MY') : '-';
+                
+                // DATA ENCODING UNTUK MODAL
+                const bookDataEncoded = encodeURIComponent(JSON.stringify(book));
 
                 tr.innerHTML = `
                     <td style="padding: 12px; text-align: center; color: #a0aec0; font-weight: bold;">${index + 1}</td>
-                    <td style="padding: 12px; font-family: monospace; color: #a0aec0;">${book.book_barcode || '-'}</td>
+                    <td style="padding: 12px; font-family: monospace; color: #a0aec0;">
+                        <span class="clickable-barcode" onclick="openBookModal('${bookDataEncoded}')">${book.book_barcode || '-'}</span>
+                    </td>
                     <td style="padding: 12px; font-family: monospace; font-size: 0.85rem; color: #a0aec0;">${book.isbn || '-'}</td>
                     <td style="padding: 12px; text-decoration: line-through; color: #a0aec0;">
                         <div style="font-weight: 500;">${book.title || 'Tiada Tajuk'}</div>
@@ -1087,7 +1097,6 @@ async function fetchInventoryBooks() {
                         <span style="background-color: #fed7d7; color: #9b2c2c; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Dilupuskan</span>
                     </td>
                     <td style="padding: 12px; text-align: center;">
-                        <!-- BUTANG PADAM KEKAL DIMASUKKAN DI SINI -->
                         <button style="background: #c53030; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold;" onclick="deleteBookPermanently('${book.book_barcode}')">Padam Kekal</button>
                     </td>
                 `;
@@ -1379,4 +1388,28 @@ async function deleteAllDisposedBooks() {
         alert("Berjaya! Semua rekod di dalam tong sampah telah dibersihkan.");
         fetchInventoryBooks(); 
     }
+}
+
+// ==========================================
+// KAWALAN MODAL POPUP MAKLUMAT BUKU
+// ==========================================
+function openBookModal(encodedBookData) {
+    // Decode kembali data buku yang dihantar dari butang
+    const book = JSON.parse(decodeURIComponent(encodedBookData));
+    
+    // Masukkan data ke dalam jadual Modal
+    document.getElementById('modal-barcode').innerText = book.book_barcode || '-';
+    document.getElementById('modal-isbn').innerText = book.isbn || '-';
+    document.getElementById('modal-title').innerText = book.title || 'Tiada Tajuk';
+    document.getElementById('modal-author').innerText = book.author || '-';
+    document.getElementById('modal-publisher').innerText = book.publisher || '-';
+    document.getElementById('modal-year').innerText = book.year_published || '-';
+    
+    // Paparkan Modal
+    document.getElementById('book-info-modal').classList.remove('hidden');
+}
+
+function closeBookModal() {
+    // Sembunyikan Modal
+    document.getElementById('book-info-modal').classList.add('hidden');
 }

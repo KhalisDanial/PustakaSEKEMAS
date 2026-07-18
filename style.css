@@ -1014,3 +1014,97 @@ body {
         margin-bottom: 0 !important;
     }
 }
+
+/* =========================================
+   19. MODAL MAKLUMAT BUKU (POPUP) & KLIK
+========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-box {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-modal-btn:hover {
+    color: var(--danger);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.book-details-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.book-details-table th, .book-details-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    text-align: left;
+}
+
+.book-details-table th {
+    width: 35%;
+    color: var(--secondary-color);
+    font-weight: 600;
+    background-color: #f7fafc;
+}
+
+.book-details-table td {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+/* Gaya teks kod bar untuk diklik */
+.clickable-barcode {
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.clickable-barcode:hover {
+    color: var(--primary-hover);
+    text-decoration-style: solid;
+}
