@@ -1056,7 +1056,14 @@ async function fetchInventoryBooks() {
                     <td style="padding: 12px;">${statusBadge}</td>
                     <td style="padding: 12px; color: #718096; font-size: 0.85rem;">${regDateStr}</td>
                     <td style="padding: 12px; text-align: center;">
-                        <button class="btn-delete-book" style="background: #e53e3e; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold;">Padam</button>
+                        <div class="action-btn-group">
+                            <button class="btn-icon-action btn-icon-edit" onclick="openEditModal('${bookDataEncoded}')" title="Kemaskini">
+                                <i data-lucide="edit"></i>
+                            </button>
+                            <button class="btn-icon-action btn-icon-delete btn-delete-book" title="Lupuskan / Padam">
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 const deleteBtn = tr.querySelector('.btn-delete-book');
@@ -1412,4 +1419,69 @@ function openBookModal(encodedBookData) {
 function closeBookModal() {
     // Sembunyikan Modal
     document.getElementById('book-info-modal').classList.add('hidden');
+}
+
+// ==========================================
+// KAWALAN MODAL KEMASKINI (EDIT) BUKU
+// ==========================================
+function openEditModal(encodedBookData) {
+    // Decode data buku
+    const book = JSON.parse(decodeURIComponent(encodedBookData));
+    
+    // Masukkan data asal ke dalam kotak borang untuk diedit
+    document.getElementById('edit-book-id').value = book.id;
+    document.getElementById('edit-barcode').value = book.book_barcode || '';
+    document.getElementById('edit-isbn').value = book.isbn || '';
+    document.getElementById('edit-title').value = book.title || '';
+    document.getElementById('edit-author').value = book.author || '';
+    document.getElementById('edit-publisher').value = book.publisher || '';
+    document.getElementById('edit-year').value = book.year_published || '';
+    
+    // Paparkan modal
+    document.getElementById('book-edit-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('book-edit-modal').classList.add('hidden');
+}
+
+async function saveBookEdit() {
+    // Ambil data terkini daripada input
+    const id = document.getElementById('edit-book-id').value;
+    const isbn = document.getElementById('edit-isbn').value.trim();
+    const title = document.getElementById('edit-title').value.trim();
+    const author = document.getElementById('edit-author').value.trim();
+    const publisher = document.getElementById('edit-publisher').value.trim();
+    const year = document.getElementById('edit-year').value.trim();
+
+    // Validasi keselamatan (Tajuk & Penulis wajib diisi)
+    if (!title || !author) {
+        alert("Ralat: Tajuk Buku dan Penulis tidak boleh dibiarkan kosong.");
+        return;
+    }
+
+    // Hantar data kemaskini ke Supabase
+    const { error } = await supabaseClient
+        .from('books')
+        .update({
+            isbn: isbn || null,
+            title: title,
+            author: author,
+            publisher: publisher || null,
+            year_published: year || null,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+    if (error) {
+        alert("Gagal mengemaskini maklumat buku. Sila hubungi Admin.");
+        console.error("Ralat Kemaskini (Update):", error);
+        return;
+    }
+
+    alert(`Berjaya! Maklumat buku "${title}" telah dikemaskini.`);
+    
+    closeEditModal();
+    fetchInventoryBooks();  // Refresh jadual inventori
+    fetchRegisteredBooks(); // Refresh jadual sirkulasi utama (jika perlu)
 }

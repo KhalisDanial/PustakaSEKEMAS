@@ -494,22 +494,38 @@
         </main>
     </div>
 
-    <!-- MODAL MAKLUMAT BUKU (POP-UP) -->
-    <div id="book-info-modal" class="modal-overlay hidden">
+    <!-- MODAL KEMASKINI BUKU (EDIT) -->
+    <div id="book-edit-modal" class="modal-overlay hidden">
         <div class="modal-box">
             <div class="modal-header">
-                <h3><i data-lucide="book"></i> Maklumat Terperinci Buku</h3>
-                <button class="close-modal-btn" onclick="closeBookModal()"><i data-lucide="x"></i></button>
+                <h3><i data-lucide="edit"></i> Kemaskini Maklumat Buku</h3>
+                <button class="close-modal-btn" onclick="closeEditModal()"><i data-lucide="x"></i></button>
             </div>
             <div class="modal-body">
-                <table class="book-details-table">
-                    <tr><th>Kod Bar Unik Sistem</th><td id="modal-barcode">-</td></tr>
-                    <tr><th>Kod ISBN</th><td id="modal-isbn">-</td></tr>
-                    <tr><th>Tajuk Buku</th><td id="modal-title">-</td></tr>
-                    <tr><th>Penulis</th><td id="modal-author">-</td></tr>
-                    <tr><th>Penerbit</th><td id="modal-publisher">-</td></tr>
-                    <tr><th>Tahun Terbit</th><td id="modal-year">-</td></tr>
-                </table>
+                <div class="manual-form">
+                    <!-- Input tersembunyi untuk menyimpan ID buku -->
+                    <input type="hidden" id="edit-book-id">
+                    
+                    <label>Kod Bar Unik Sistem (Tidak Boleh Diubah)</label>
+                    <input type="text" id="edit-barcode" disabled style="background-color: #edf2f7; cursor: not-allowed; color: #718096; font-family: monospace;">
+
+                    <label>Kod ISBN</label>
+                    <input type="text" id="edit-isbn" placeholder="Cth: 978967... (Pilihan)">
+                    
+                    <label>Tajuk Buku (Wajib)</label>
+                    <input type="text" id="edit-title">
+                    
+                    <label>Penulis (Wajib)</label>
+                    <input type="text" id="edit-author">
+
+                    <label>Penerbit</label>
+                    <input type="text" id="edit-publisher" placeholder="Pilihan">
+
+                    <label>Tahun Terbit</label>
+                    <input type="text" id="edit-year" placeholder="Cth: 2023 (Pilihan)">
+                    
+                    <button class="btn-submit-form" onclick="saveBookEdit()">Simpan Perubahan</button>
+                </div>
             </div>
         </div>
     </div>

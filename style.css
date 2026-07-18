@@ -1108,3 +1108,47 @@ body {
     color: var(--primary-hover);
     text-decoration-style: solid;
 }
+
+/* =========================================
+   20. BUTANG TINDAKAN INVENTORI (EDIT & DELETE)
+========================================= */
+.action-btn-group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-icon-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+}
+
+/* Warna Kuning / Oren untuk Kemaskini (Edit) */
+.btn-icon-edit {
+    background-color: #d69e2e;
+}
+.btn-icon-edit:hover {
+    background-color: #b7791f;
+}
+
+/* Warna Merah untuk Padam (Delete) */
+.btn-icon-delete {
+    background-color: var(--danger);
+}
+.btn-icon-delete:hover {
+    background-color: #c53030;
+}
+
+.btn-icon-action .lucide {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+}
