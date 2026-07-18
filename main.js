@@ -1039,8 +1039,8 @@ async function fetchInventoryBooks() {
                     ? `<span style="background-color: #c6f6d5; color: #22543d; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">Ada</span>`
                     : `<span style="background-color: #bee3f8; color: #2a4365; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">Dipinjam</span>`;
 
-                // DATA ENCODING UNTUK MODAL
-                const bookDataEncoded = encodeURIComponent(JSON.stringify(book));
+                // DATA ENCODING UNTUK MODAL (Telah ditambah pelindung koma bertitik)
+                const bookDataEncoded = encodeURIComponent(JSON.stringify(book)).replace(/'/g, "%27");
 
                 tr.innerHTML = `
                     <td style="padding: 12px; text-align: center; color: #718096; font-weight: bold;">${index + 1}</td>
@@ -1084,8 +1084,8 @@ async function fetchInventoryBooks() {
                 const regDateStr = new Date(book.created_at).toLocaleDateString('ms-MY');
                 const removalDateStr = book.updated_at ? new Date(book.updated_at).toLocaleDateString('ms-MY') : '-';
                 
-                // DATA ENCODING UNTUK MODAL
-                const bookDataEncoded = encodeURIComponent(JSON.stringify(book));
+                // DATA ENCODING UNTUK MODAL (Telah ditambah pelindung koma bertitik)
+                const bookDataEncoded = encodeURIComponent(JSON.stringify(book)).replace(/'/g, "%27");
 
                 tr.innerHTML = `
                     <td style="padding: 12px; text-align: center; color: #a0aec0; font-weight: bold;">${index + 1}</td>
@@ -1109,7 +1109,7 @@ async function fetchInventoryBooks() {
                 `;
                 inactiveTableBody.appendChild(tr);
             });
-        }
+        }lucide.createIcons();
     } catch (error) {
         console.error("Ralat membina senarai inventori:", error);
     }

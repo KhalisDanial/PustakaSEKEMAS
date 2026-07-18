@@ -494,6 +494,26 @@
         </main>
     </div>
 
+    <!-- MODAL MAKLUMAT BUKU (POP-UP) -->
+    <div id="book-info-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i data-lucide="book"></i> Maklumat Terperinci Buku</h3>
+                <button class="close-modal-btn" onclick="closeBookModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <table class="book-details-table">
+                    <tr><th>Kod Bar Unik Sistem</th><td id="modal-barcode">-</td></tr>
+                    <tr><th>Kod ISBN</th><td id="modal-isbn">-</td></tr>
+                    <tr><th>Tajuk Buku</th><td id="modal-title">-</td></tr>
+                    <tr><th>Penulis</th><td id="modal-author">-</td></tr>
+                    <tr><th>Penerbit</th><td id="modal-publisher">-</td></tr>
+                    <tr><th>Tahun Terbit</th><td id="modal-year">-</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
     <!-- MODAL KEMASKINI BUKU (EDIT) -->
     <div id="book-edit-modal" class="modal-overlay hidden">
         <div class="modal-box">
