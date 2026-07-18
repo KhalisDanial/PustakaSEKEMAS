@@ -994,7 +994,7 @@ async function fetchInventoryBooks() {
             .from('books')
             .select('*')
             .eq('school_id', currentSchoolId)
-            .order('created_at', { ascending: false });
+            .order('book_barcode', { ascending: true });
 
         if (error) throw error;
         activeTableBody.innerHTML = ''; inactiveTableBody.innerHTML = '';
