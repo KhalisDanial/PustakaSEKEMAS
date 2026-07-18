@@ -414,11 +414,22 @@
                     
                     <!-- SEKSYEN A: Buku Aktif -->
                     <div id="inv-active-section" class="inventori-section">
+                        <!-- Bekas Butang Tindakan Pukal (Disembunyikan pada asalnya, hanya muncul bila ditanda) -->
+                        <div id="bulk-action-container" style="margin-bottom: 15px; display: none; justify-content: flex-end;">
+                            <button class="btn-action" style="background-color: #e53e3e; color: white;" onclick="bulkDeleteActiveBooks()">
+                                <i data-lucide="trash-2"></i> Lupuskan <span id="bulk-count">0</span> Buku Terpilih
+                            </button>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="library-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 50px; text-align: center;">Bil.</th> <!-- DITAMBAH -->
+                                        <!-- MASTER CHECKBOX UNTUK PILIH SEMUA -->
+                                        <th style="width: 40px; text-align: center;">
+                                            <input type="checkbox" id="master-checkbox" style="cursor: pointer; transform: scale(1.2);" onclick="toggleAllActiveBooks(this)">
+                                        </th>
+                                        <th style="width: 50px; text-align: center;">Bil.</th>
                                         <th>Kod Bar Sistem</th> 
                                         <th>ISBN</th> 
                                         <th>Maklumat Buku</th> 
@@ -429,7 +440,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="inventory-active-table-body">
-                                    <tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
+                                    <tr><td colspan="9" style="text-align:center; padding:15px;">Memuatkan data...</td></tr>
                                 </tbody>
                             </table>
                         </div>

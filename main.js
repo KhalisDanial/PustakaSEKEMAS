@@ -984,7 +984,7 @@ async function fetchInventoryBooks() {
     const inactiveTableBody = document.getElementById('inventory-inactive-table-body');
     if (!activeTableBody || !inactiveTableBody) return;
 
-    activeTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan senarai buku aktif...</td></tr>`;
+    activeTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:15px;">Memuatkan senarai buku aktif...</td></tr>`;
     inactiveTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px;">Memuatkan rekod buku dilupuskan...</td></tr>`;
 
     const searchQuery = document.getElementById('inventori-search-input')?.value.toLowerCase().trim() || '';
@@ -1026,7 +1026,7 @@ async function fetchInventoryBooks() {
         }
         // 1. PAPARAN JADUAL BUKU AKTIF
         if (activeBooks.length === 0) {
-            activeTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color: #718096;">Tiada padanan buku aktif.</td></tr>`;
+            activeTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:15px; color: #718096;">Tiada padanan buku aktif.</td></tr>`;
         } else {
             activeBooks.forEach((book, index) => {
                 const tr = document.createElement('tr');
@@ -1043,6 +1043,9 @@ async function fetchInventoryBooks() {
                 const bookDataEncoded = encodeURIComponent(JSON.stringify(book)).replace(/'/g, "%27");
 
                 tr.innerHTML = `
+                    <td style="padding: 12px; text-align: center;">
+                        <input type="checkbox" class="row-checkbox" value="${book.id}" style="cursor: pointer; transform: scale(1.2);" onchange="updateBulkDeleteButton()">
+                    </td>
                     <td style="padding: 12px; text-align: center; color: #718096; font-weight: bold;">${index + 1}</td>
                     <td style="padding: 12px; font-family: monospace; font-weight: bold; color: #2b6cb0;">
                         <span class="clickable-barcode" onclick="openBookModal('${bookDataEncoded}')">${book.book_barcode || '-'}</span>
@@ -1484,4 +1487,68 @@ async function saveBookEdit() {
     closeEditModal();
     fetchInventoryBooks();  // Refresh jadual inventori
     fetchRegisteredBooks(); // Refresh jadual sirkulasi utama (jika perlu)
+}
+
+// ==========================================
+// KAWALAN TINDAKAN PUKAL (BULK DELETE) BUKU AKTIF
+// ==========================================
+
+// Fungsi A: Tandakan atau nyah-tanda semua buku yang dipaparkan
+function toggleAllActiveBooks(masterCheckbox) {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+    updateBulkDeleteButton();
+}
+
+// Fungsi B: Kawal paparan dan kaunter butang "Lupuskan X Buku Terpilih"
+function updateBulkDeleteButton() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    const container = document.getElementById('bulk-action-container');
+    const countSpan = document.getElementById('bulk-count');
+    
+    if (checkboxes.length > 0) {
+        container.style.display = 'flex';
+        countSpan.innerText = checkboxes.length;
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+// Fungsi C: Arahan pemadaman pukal ke Supabase
+async function bulkDeleteActiveBooks() {
+    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkedBoxes.length === 0) return;
+    
+    const confirmDelete = confirm(`AMARAN PENTING!\n\nAdakah anda pasti mahu melupuskan ${checkedBoxes.length} buah buku yang dipilih ke dalam tong sampah secara serentak?`);
+    if (!confirmDelete) return;
+
+    // Kumpulkan semua nilai ID buku ke dalam senarai Array ([12, 45, 87...])
+    const idsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
+
+    try {
+        // Hantar arahan kemaskini menggunakan fungsi .in() bagi menjimatkan panggilan API
+        const { error } = await supabaseClient
+            .from('books')
+            .update({ 
+                is_active: false, 
+                updated_at: new Date().toISOString() 
+            })
+            .in('id', idsToDelete);
+
+        if (error) throw error;
+
+        alert(`Selesai! ${idsToDelete.length} buah buku telah berjaya dilupuskan.`);
+        
+        // Buang tanda (tick) pada Master Checkbox dan sembunyikan butang semula
+        const masterCb = document.getElementById('master-checkbox');
+        if (masterCb) masterCb.checked = false;
+        document.getElementById('bulk-action-container').style.display = 'none';
+        
+        // Segarkan paparan jadual
+        fetchInventoryBooks(); 
+        fetchRegisteredBooks();
+    } catch (error) {
+        alert(`Ralat sistem semasa pemadaman pukal: ${error.message}`);
+        console.error("Bulk Delete Error:", error);
+    }
 }
