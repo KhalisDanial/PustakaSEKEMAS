@@ -96,6 +96,12 @@ async function showApp(user) {
     switchLibraryView('SIRKULASI');
 
     setupRealtimeSubscriptions();
+
+    // Letakkan ini di baris paling akhir di dalam fungsi showApp(user) sedia ada anda:
+    const isKioskSaved = localStorage.getItem('pustaka_kiosk_locked') === 'true';
+    if (isKioskSaved) {
+        setTimeout(() => { toggleKioskMode(true); }, 300);
+    }    
 }
 
 function showLogin() {
@@ -1282,20 +1288,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// ========================================================
+// KAWALAN MOD KIOSK MUTLAK (PERSISTENT & FULLSCREEN)
+// ========================================================
 function toggleKioskMode(isLocked) {
     const sidebar = document.querySelector('.library-sidebar');
     const scanInput = document.getElementById('library-scan-input');
-    if (isLocked) { sidebar.style.display = 'none'; scanInput.focus(); } 
-    else { sidebar.style.display = 'flex'; }
+    
+    if (isLocked) {
+        if (sidebar) sidebar.style.display = 'none'; 
+        if (scanInput) scanInput.focus();
+        
+        // 1. Simpan status kunci ke storan peranti (Kalis Refresh!)
+        localStorage.setItem('pustaka_kiosk_locked', 'true');
+        
+        // 2. Paksa pelayar masuk ke Mod Skrin Penuh (Sembunyikan URL & Search Bar)
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(err => console.log("Fullscreen disekat:", err));
+        }
+    } else {
+        if (sidebar) sidebar.style.display = 'flex';
+        
+        // 1. Padam status kunci dari storan peranti
+        localStorage.removeItem('pustaka_kiosk_locked');
+        
+        // 2. Keluar daripada Mod Skrin Penuh
+        if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(err => console.log("Gagal keluar fullscreen:", err));
+        }
+    }
 }
 
+// Pengurusan Fokus Magnetik: Hanya paksa fokus jika mod kiosk sedang aktif
 const scannerInput = document.getElementById('library-scan-input');
 document.addEventListener('click', (e) => {
-    const sidebar = document.querySelector('.library-sidebar');
-    if (sidebar.style.display === 'none' && document.activeElement !== scannerInput) scannerInput.focus();
+    const isLocked = (localStorage.getItem('pustaka_kiosk_locked') === 'true');
+    if (isLocked && scannerInput && document.activeElement !== scannerInput) {
+        scannerInput.focus();
+    }
 });
-scannerInput.addEventListener('blur', () => setTimeout(() => scannerInput.focus(), 100));
 
+if (scannerInput) {
+    scannerInput.addEventListener('blur', () => {
+        const isLocked = (localStorage.getItem('pustaka_kiosk_locked') === 'true');
+        if (isLocked) setTimeout(() => scannerInput.focus(), 100);
+    });
+}
+
+// Pemicu Rahsia 5 Kali Klik (Berdasarkan memori storan, bukan lagi rupa bentuk sidebar)
 let tapCount = 0; let tapTimer = null;
 const triggerBtn = document.getElementById('kiosk-trigger');
 if (triggerBtn) {
@@ -1303,12 +1343,14 @@ if (triggerBtn) {
         tapCount++;
         clearTimeout(tapTimer);
         tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
+        
         if (tapCount === 5) {
-            const sidebar = document.querySelector('.library-sidebar');
-            const isCurrentlyLocked = (sidebar.style.display === 'none');
-            toggleKioskMode(isCurrentlyLocked ? false : true);
+            const isCurrentlyLocked = (localStorage.getItem('pustaka_kiosk_locked') === 'true');
+            const nextState = !isCurrentlyLocked; // Terbalikkan status semasa
+            
+            toggleKioskMode(nextState);
             tapCount = 0;
-            alert(isCurrentlyLocked ? "Sistem Dibuka (Admin Mode)" : "Sistem Dikunci (Kiosk Mode)");
+            alert(nextState ? "Sistem Dikunci (Kiosk Mode Aktif)" : "Sistem Dibuka (Admin Mode Aktif)");
         }
     });
 }
