@@ -94,6 +94,8 @@ async function showApp(user) {
     // Mulakan proses memuatkan data sistem
     fetchStudents();
     switchLibraryView('SIRKULASI');
+
+    setupRealtimeSubscriptions();
 }
 
 function showLogin() {
@@ -1551,4 +1553,27 @@ async function bulkDeleteActiveBooks() {
         alert(`Ralat sistem semasa pemadaman pukal: ${error.message}`);
         console.error("Bulk Delete Error:", error);
     }
+}
+
+// ==========================================
+// KAWALAN MASA-NYATA (REALTIME SUBSCRIPTION)
+// ==========================================
+function setupRealtimeSubscriptions() {
+    console.log("Mengaktifkan soket masa-nyata Supabase...");
+    
+    supabaseClient
+        .channel('public-library-changes')
+        // Dengar sebarang perubahan pada jadual PINJAMAN (library_loans)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'library_loans' }, payload => {
+            console.log("Perubahan sirkulasi dikesan dari peranti lain!");
+            // Auto-refresh jadual jika laptop sedang memaparkan tab ini
+            if (currentLibraryView === 'LOG') fetchRegisteredBooks();
+            if (currentLibraryView === 'HISTORY') fetchLoanHistory();
+        })
+        // Dengar sebarang perubahan status pada jadual BUKU (books)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, payload => {
+            if (currentLibraryView === 'LOG') fetchRegisteredBooks();
+            if (currentLibraryView === 'INVENTORI') fetchInventoryBooks();
+        })
+        .subscribe();
 }
