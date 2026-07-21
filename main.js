@@ -75,7 +75,7 @@ async function showApp(user) {
 
         if (profile) {
             displayName = profile.full_name;
-            displayRole = profile.role || "Pustakawan SEKEMAS";
+            displayRole = profile.role || "Guru Perpustakaan & Media SEKEMAS";
         }
     } catch (err) {
         console.warn("Gagal memuatkan profil pengguna, menggunakan e-mel sebagai ganti:", err.message);
@@ -85,7 +85,7 @@ async function showApp(user) {
     const userBadge = document.querySelector('.user-badge');
     if (userBadge) {
         userBadge.innerHTML = `
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Pustakawan Bertugas:</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Guru Perpustakaan & Media Bertugas:</div>
             <strong style="color: var(--primary-color); font-size: 0.95rem; display: block; margin: 3px 0; line-height: 1.3;">${displayName}</strong>
             <span style="background: #e2e8f0; color: #4a5568; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block;">${displayRole}</span>
         `;
