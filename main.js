@@ -327,6 +327,7 @@ async function processBookReturn(book) {
     await supabaseClient.from('books').update({ status: 'Available' }).eq('id', book.id);
 
     showFeedback(`Berjaya dipulangkan! "${book.title}" telah diterima kembali.`, "success");
+    showSuccessFlash(`Pulang Berjaya!<br><span style="font-size: 1.5rem;">${book.title} sedia dipinjam semula</span>`);
     updateLatestActionUI({
         type: 'PULANG',
         studentName: studentInfo ? studentInfo.name : 'Murid Umum',
