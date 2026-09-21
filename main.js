@@ -472,6 +472,9 @@ async function lookupISBN() {
         document.getElementById('isbn-unique-barcode').value = '';
 
         previewCard.classList.remove('hidden');
+
+        //Auto-focus on the unique barcode input
+        document.getElementById('isbn-unique-barcode').focus();
     } catch (error) {
         console.error("Ralat penuh API ISBN:", error); 
         alert("Gagal menghubungi pelayan maklumat API. Semak konsol F12 untuk ralat.");
