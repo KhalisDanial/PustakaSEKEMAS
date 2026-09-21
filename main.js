@@ -1377,11 +1377,13 @@ async function deleteBookPermanently(bookBarcode) {
         return;
     }
 
-    // LANGKAH 2: Padam sejarah pinjaman (child records) buku ini terlebih dahulu
-    await supabaseClient
+    // LANGKAH 2: Padam sejarah pinjaman (child records)
+    const { error: deleteLoanError } = await supabaseClient
         .from('library_loans')
         .delete()
         .eq('book_id', book.id);
+
+    if (deleteLoanError) console.error("Amaran Padam Pinjaman:", deleteLoanError);
 
     // LANGKAH 3: Padam rekod fizikal buku
     const { error } = await supabaseClient
@@ -1390,7 +1392,7 @@ async function deleteBookPermanently(bookBarcode) {
         .eq('id', book.id);
 
     if (error) {
-        alert("Gagal memadam rekod buku secara kekal.");
+        alert("Gagal memadam rekod buku secara kekal. Pastikan Foreign Key ditetapkan kepada CASCADE di Supabase.");
         console.error("Ralat Delete:", error);
     } else {
         alert("Berjaya! Buku dan sejarahnya telah dipadamkan secara kekal dari sistem.");
@@ -1404,7 +1406,7 @@ async function deleteAllDisposedBooks() {
     
     if (!confirmDeleteAll) return;
 
-    // LANGKAH 1: Kenal pasti semua ID buku di dalam tong sampah (is_active = false)
+    // LANGKAH 1: Kenal pasti semua ID buku di dalam tong sampah
     const { data: disposedBooks, error: fetchError } = await supabaseClient
         .from('books')
         .select('id')
@@ -1420,24 +1422,25 @@ async function deleteAllDisposedBooks() {
         return;
     }
 
-    // Ekstrak ID sahaja ke dalam bentuk array (Contoh: [12, 45, 87])
     const bookIds = disposedBooks.map(b => b.id);
 
-    // LANGKAH 2: Bersihkan semua sejarah pinjaman yang berkaitan secara serentak
-    await supabaseClient
+    // LANGKAH 2: Bersihkan semua sejarah pinjaman yang berkaitan
+    const { error: deleteLoansError } = await supabaseClient
         .from('library_loans')
         .delete()
         .in('book_id', bookIds);
 
+    if (deleteLoansError) console.error("Amaran Padam Pinjaman:", deleteLoansError);
+
     // LANGKAH 3: Padam semua buku tersebut
-    const { error } = await supabaseClient
+    const { error: deleteBooksError } = await supabaseClient
         .from('books')
         .delete()
         .in('id', bookIds); 
 
-    if (error) {
-        alert("Gagal memadam semua rekod. Sila semak konsol.");
-        console.error("Ralat Delete All:", error);
+    if (deleteBooksError) {
+        alert("Gagal memadam rekod buku. Sila pastikan Foreign Key ditetapkan kepada CASCADE di Supabase.");
+        console.error("Ralat Delete All:", deleteBooksError);
     } else {
         alert("Berjaya! Semua rekod di dalam tong sampah telah dibersihkan.");
         fetchInventoryBooks(); 
