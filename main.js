@@ -529,7 +529,9 @@ async function uploadISBNData() {
         return;
     }
 
-    alert(`Berjaya mendaftarkan: "${temporaryBookData.title}" dengan kod sistem ${systemBarcode}!`);
+    // alert(`Berjaya mendaftarkan: "${temporaryBookData.title}" dengan kod sistem ${systemBarcode}!`);
+    // alert(`Berjaya mendaftarkan: "${temporaryBookData.title}" dengan kod sistem ${systemBarcode}!`);
+    showSuccessFlash(`Berjaya!<br><span style="font-size: 1.5rem;">"${temporaryBookData.title}" didaftarkan.</span>`);
     
     temporaryBookData = null;
     document.getElementById('isbn-preview-card').classList.add('hidden');
@@ -591,7 +593,8 @@ async function saveManualBook() {
         return;
     }
 
-    alert(`Buku "${title}" berjaya didaftarkan secara manual!`);
+    // alert(`Buku "${title}" berjaya didaftarkan secara manual!`);
+    showSuccessFlash(`Berjaya!<br><span style="font-size: 1.5rem;">"${title}" didaftarkan.</span>`);
 
     barcodeInput.value = '';
     isbnInput.value = '';
@@ -1624,4 +1627,22 @@ function setupRealtimeSubscriptions() {
             if (currentLibraryView === 'INVENTORI') fetchInventoryBooks();
         })
         .subscribe();
+}
+
+function showSuccessFlash(message) {
+    const overlay = document.getElementById('success-flash-overlay');
+    const msgEl = document.getElementById('flash-message');
+    
+    // Set message and show overlay
+    msgEl.innerHTML = message;
+    overlay.classList.remove('hidden', 'fade-out');
+    lucide.createIcons(); // Ensure the check icon renders
+    
+    // Auto fade-out after 1.2 seconds
+    setTimeout(() => {
+        overlay.classList.add('fade-out');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 400); // Matches the CSS transition duration
+    }, 1200);
 }
