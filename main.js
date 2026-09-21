@@ -199,6 +199,7 @@ async function handleIncomingBarcode(barcode) {
         activeBorrower = student;
         updateBorrowerUI(student);
         showFeedback("Murid dikesan! Sila imbas kod bar sistem (sekolah) pada buku.", "success");
+        showSuccessFlash(`Murid Dikesan!<br><span style="font-size: 1.5rem;">Hai ${student.name}, sila imbas buku.</span>`);
         return;
     }
 
@@ -288,6 +289,7 @@ async function processBookBorrow(student, book) {
     if (bookError) return;
 
     showFeedback(`Berjaya! "${book.title}" telah dipinjam oleh ${student.name}.`, "success");
+    showSuccessFlash(`Pinjaman Berjaya!<br><span style="font-size: 1.5rem;">Buku diserahkan kepada ${student.name}</span>`);
     updateLatestActionUI({
         type: 'PINJAM',
         studentName: student.name,
